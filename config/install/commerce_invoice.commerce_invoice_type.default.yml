@@ -1,0 +1,7 @@
+langcode: en
+status: true
+label: Default
+id: default
+workflow: invoice_default
+receiptBcc: ''
+traits: {  }

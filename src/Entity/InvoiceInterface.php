@@ -5,12 +5,13 @@ namespace Drupal\commerce_invoice\Entity;
 use Drupal\commerce_store\Entity\StoreInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\profile\Entity\ProfileInterface;
+use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
 
 /**
  * Defines the interface for invoices.
  */
-interface InvoiceInterface extends ContentEntityInterface {
+interface InvoiceInterface extends ContentEntityInterface, EntityOwnerInterface {
 
   /**
    * Gets the invoice number.

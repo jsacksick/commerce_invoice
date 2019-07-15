@@ -42,6 +42,7 @@ use Drupal\user\UserInterface;
  *     "id" = "invoice_id",
  *     "label" = "invoice_number",
  *     "uuid" = "uuid",
+ *     "owner" = "uid",
  *     "bundle" = "type"
  *   },
  *   bundle_entity_type = "commerce_invoice_type",
