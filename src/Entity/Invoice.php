@@ -341,6 +341,16 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
       ->setDisplayConfigurable('form', FALSE)
       ->setDisplayConfigurable('view', FALSE);
 
+    $fields['invoice_items'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Invoice items'))
+      ->setDescription(t('The invoice items.'))
+      ->setRequired(TRUE)
+      ->setCardinality(BaseFieldDefinition::CARDINALITY_UNLIMITED)
+      ->setSetting('target_type', 'commerce_invoice_item')
+      ->setSetting('handler', 'default')
+      ->setDisplayConfigurable('form', FALSE)
+      ->setDisplayConfigurable('view', FALSE);
+
     $fields['total_price'] = BaseFieldDefinition::create('commerce_price')
       ->setLabel(t('Total price'))
       ->setDescription(t('The total price of the invoice.'))
