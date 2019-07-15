@@ -1,0 +1,7 @@
+commerce_invoice.configuration:
+  path: '/admin/commerce/config/invoices'
+  defaults:
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+    _title: 'Invoices'
+  requirements:
+    _permission: 'access commerce administration pages'
