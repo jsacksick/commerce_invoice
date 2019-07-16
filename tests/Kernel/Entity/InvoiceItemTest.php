@@ -12,7 +12,7 @@ use Drupal\Tests\commerce\Kernel\CommerceKernelTestBase;
  *
  * @coversDefaultClass \Drupal\commerce_invoice\Entity\InvoiceItem
  *
- * @group commerce
+ * @group commerce_invoice
  */
 class InvoiceItemTest extends CommerceKernelTestBase {
 

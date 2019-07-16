@@ -3,7 +3,10 @@
 namespace Drupal\commerce_invoice\Entity;
 
 use Drupal\commerce\Entity\CommerceContentEntityBase;
+use Drupal\commerce_order\Adjustment;
 use Drupal\commerce_store\Entity\StoreInterface;
+use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -43,7 +46,7 @@ use Drupal\user\UserInterface;
  *     "label" = "invoice_number",
  *     "uuid" = "uuid",
  *     "owner" = "uid",
- *     "bundle" = "type"
+ *     "bundle" = "type",
  *   },
  *   bundle_entity_type = "commerce_invoice_type",
  *   field_ui_base_route = "entity.commerce_invoice_type.edit_form"
@@ -51,6 +54,7 @@ use Drupal\user\UserInterface;
  */
 class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
 
+  use EntityChangedTrait;
   use EntityOwnerTrait;
 
   /**
@@ -221,12 +225,103 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
   /**
    * {@inheritdoc}
    */
+  public function getAdjustments(array $adjustment_types = []) {
+    /** @var \Drupal\commerce_order\Adjustment[] $adjustments */
+    $adjustments = $this->get('adjustments')->getAdjustments();
+    // Filter adjustments by type, if needed.
+    if ($adjustment_types) {
+      foreach ($adjustments as $index => $adjustment) {
+        if (!in_array($adjustment->getType(), $adjustment_types)) {
+          unset($adjustments[$index]);
+        }
+      }
+      $adjustments = array_values($adjustments);
+    }
+
+    return $adjustments;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setAdjustments(array $adjustments) {
+    $this->set('adjustments', $adjustments);
+    $this->recalculateTotalPrice();
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function addAdjustment(Adjustment $adjustment) {
+    $this->get('adjustments')->appendItem($adjustment);
+    $this->recalculateTotalPrice();
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function removeAdjustment(Adjustment $adjustment) {
+    $this->get('adjustments')->removeAdjustment($adjustment);
+    $this->recalculateTotalPrice();
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function collectAdjustments(array $adjustment_types = []) {
+    $adjustments = [];
+    foreach ($this->getItems() as $invoice_item) {
+      foreach ($invoice_item->getAdjustments($adjustment_types) as $adjustment) {
+        $adjustments[] = $adjustment;
+      }
+    }
+    foreach ($this->getAdjustments($adjustment_types) as $adjustment) {
+      $adjustments[] = $adjustment;
+    }
+
+    return $adjustments;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSubtotalPrice() {
+    /** @var \Drupal\commerce_price\Price $subtotal_price */
+    $subtotal_price = NULL;
+    foreach ($this->getItems() as $invoice_item) {
+      if ($invoice_item_total = $invoice_item->getTotalPrice()) {
+        $subtotal_price = $subtotal_price ? $subtotal_price->add($invoice_item_total) : $invoice_item_total;
+      }
+    }
+    return $subtotal_price;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function recalculateTotalPrice() {
     /** @var \Drupal\commerce_price\Price $total_price */
     $total_price = NULL;
     foreach ($this->getItems() as $invoice_item) {
       if ($invoice_item_total = $invoice_item->getTotalPrice()) {
         $total_price = $total_price ? $total_price->add($invoice_item_total) : $invoice_item_total;
+      }
+    }
+    if ($total_price) {
+      $adjustments = $this->collectAdjustments();
+      if ($adjustments) {
+        /** @var \Drupal\commerce_order\AdjustmentTransformerInterface $adjustment_transformer */
+        $adjustment_transformer = \Drupal::service('commerce_order.adjustment_transformer');
+        $adjustments = $adjustment_transformer->combineAdjustments($adjustments);
+        $adjustments = $adjustment_transformer->roundAdjustments($adjustments);
+        foreach ($adjustments as $adjustment) {
+          if (!$adjustment->isIncluded()) {
+            $total_price = $total_price->add($adjustment->getAmount());
+          }
+        }
       }
     }
     $this->total_price = $total_price;
@@ -262,6 +357,22 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
    */
   public function setCreatedTime($timestamp) {
     $this->set('created', $timestamp);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDueDate() {
+    // Can't use the ->date property because it resets the timezone to UTC.
+    return new DrupalDateTime($this->get('due_date')->value);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setDueDate(DrupalDateTime $start_date) {
+    $this->get('due_date')->value = $start_date->format('Y-m-d');
     return $this;
   }
 
@@ -313,9 +424,7 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
       ->setDescription(t('The invoice number.'))
       ->setRequired(TRUE)
       ->setDefaultValue('')
-      ->setSetting('max_length', 255)
-      ->setDisplayConfigurable('form', FALSE)
-      ->setDisplayConfigurable('view', FALSE);
+      ->setSetting('max_length', 255);
 
     $fields['store_id'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Store'))
@@ -324,9 +433,7 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
       ->setRequired(TRUE)
       ->setSetting('target_type', 'commerce_store')
       ->setSetting('handler', 'default')
-      ->setTranslatable(TRUE)
-      ->setDisplayConfigurable('form', FALSE)
-      ->setDisplayConfigurable('view', FALSE);
+      ->setTranslatable(TRUE);
 
     $fields['uid']
       ->setLabel(t('Customer'))
@@ -338,9 +445,7 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
       ->setSetting('target_type', 'profile')
       ->setSetting('handler', 'default')
       ->setSetting('handler_settings', ['target_bundles' => ['customer']])
-      ->setTranslatable(TRUE)
-      ->setDisplayConfigurable('form', FALSE)
-      ->setDisplayConfigurable('view', FALSE);
+      ->setTranslatable(TRUE);
 
     $fields['invoice_items'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Invoice items'))
@@ -348,31 +453,57 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
       ->setRequired(TRUE)
       ->setCardinality(BaseFieldDefinition::CARDINALITY_UNLIMITED)
       ->setSetting('target_type', 'commerce_invoice_item')
-      ->setSetting('handler', 'default')
-      ->setDisplayConfigurable('form', FALSE)
-      ->setDisplayConfigurable('view', FALSE);
+      ->setSetting('handler', 'default');
+
+    $fields['adjustments'] = BaseFieldDefinition::create('commerce_adjustment')
+      ->setLabel(t('Adjustments'))
+      ->setCardinality(BaseFieldDefinition::CARDINALITY_UNLIMITED);
 
     $fields['total_price'] = BaseFieldDefinition::create('commerce_price')
       ->setLabel(t('Total price'))
       ->setDescription(t('The total price of the invoice.'))
-      ->setReadOnly(TRUE)
-      ->setDisplayConfigurable('form', FALSE)
-      ->setDisplayConfigurable('view', FALSE);
+      ->setReadOnly(TRUE);
 
     $fields['state'] = BaseFieldDefinition::create('state')
       ->setLabel(t('State'))
       ->setDescription(t('The invoice state.'))
       ->setRequired(TRUE)
       ->setSetting('max_length', 255)
-      ->setDisplayConfigurable('form', FALSE)
-      ->setDisplayConfigurable('view', FALSE)
       ->setSetting('workflow_callback', ['\Drupal\commerce_invoice\Entity\Invoice', 'getWorkflowId']);
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'))
       ->setDescription(t('The time when the invoice was created.'));
 
+    $fields['changed'] = BaseFieldDefinition::create('changed')
+      ->setLabel(t('Changed'))
+      ->setDescription(t('The time when the invoice was last edited.'));
+
+    $fields['due_date'] = BaseFieldDefinition::create('datetime')
+      ->setLabel(t('Due date'))
+      ->setDescription(t('The date the invoice is due.'))
+      ->setRequired(TRUE)
+      ->setSetting('datetime_type', 'date')
+      ->setDefaultValueCallback('Drupal\commerce_invoice\Entity\Invoice::getDefaultDueDate')
+      ->setDisplayOptions('form', [
+        'type' => 'datetime_default',
+        'weight' => 5,
+      ]);
+
     return $fields;
+  }
+
+  /**
+   * Default value callback for 'due_date' base field definition.
+   *
+   * @see ::baseFieldDefinitions()
+   *
+   * @return string
+   *   The default value (date string).
+   */
+  public static function getDefaultDueDate() {
+    $timestamp = \Drupal::time()->getRequestTime();
+    return gmdate('Y-m-d', $timestamp);
   }
 
   /**

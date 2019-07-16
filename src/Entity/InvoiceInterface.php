@@ -2,8 +2,11 @@
 
 namespace Drupal\commerce_invoice\Entity;
 
+use Drupal\commerce_order\EntityAdjustableInterface;
 use Drupal\commerce_store\Entity\StoreInterface;
+use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\profile\Entity\ProfileInterface;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
@@ -11,7 +14,7 @@ use Drupal\user\UserInterface;
 /**
  * Defines the interface for invoices.
  */
-interface InvoiceInterface extends ContentEntityInterface, EntityOwnerInterface {
+interface InvoiceInterface extends ContentEntityInterface, EntityAdjustableInterface, EntityChangedInterface, EntityOwnerInterface {
 
   /**
    * Gets the invoice number.
@@ -181,6 +184,36 @@ interface InvoiceInterface extends ContentEntityInterface, EntityOwnerInterface 
   public function hasItem(InvoiceItemInterface $invoice_item);
 
   /**
+   * Collects all adjustments that belong to the invoice.
+   *
+   * Unlike getAdjustments() which returns only invoice adjustments, this
+   * method returns both invoice and invoice item adjustments.
+   *
+   * Important:
+   * The returned adjustments are unprocessed, and must be processed before use.
+   *
+   * @param string[] $adjustment_types
+   *   The adjustment types to include.
+   *   Examples: fee, promotion, tax. Defaults to all adjustment types.
+   *
+   * @return \Drupal\commerce_order\Adjustment[]
+   *   The adjustments.
+   *
+   * @see \Drupal\commerce_order\AdjustmentTransformerInterface::processAdjustments()
+   */
+  public function collectAdjustments(array $adjustment_types = []);
+
+  /**
+   * Gets the invoice subtotal price.
+   *
+   * Represents a sum of all invoice item totals.
+   *
+   * @return \Drupal\commerce_price\Price|null
+   *   The invoice subtotal price, or NULL.
+   */
+  public function getSubtotalPrice();
+
+  /**
    * Recalculates the invoice total price.
    *
    * @return $this
@@ -223,5 +256,22 @@ interface InvoiceInterface extends ContentEntityInterface, EntityOwnerInterface 
    */
   public function setCreatedTime($timestamp);
 
+  /**
+   * Gets the invoice due date.
+   *
+   * @return \Drupal\Core\Datetime\DrupalDateTime
+   *   The invoice due date.
+   */
+  public function getDueDate();
+
+  /**
+   * Sets the invoice due date.
+   *
+   * @param \Drupal\Core\Datetime\DrupalDateTime $due_date
+   *   The invoice due date.
+   *
+   * @return $this
+   */
+  public function setDueDate(DrupalDateTime $due_date);
 
 }
