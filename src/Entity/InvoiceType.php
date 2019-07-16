@@ -24,12 +24,15 @@ use Drupal\commerce\Entity\CommerceBundleEntityBase;
  *       "edit" = "Drupal\commerce_invoice\Form\InvoiceTypeForm",
  *       "delete" = "Drupal\commerce\Form\CommerceBundleEntityDeleteFormBase"
  *     },
+ *     "local_task_provider" = {
+ *       "default" = "Drupal\entity\Menu\DefaultEntityLocalTaskProvider",
+ *     },
  *     "route_provider" = {
  *       "default" = "Drupal\entity\Routing\DefaultHtmlRouteProvider",
  *     },
  *     "list_builder" = "Drupal\commerce_invoice\InvoiceTypeListBuilder",
  *   },
- *   admin_permission = "administer commerce_invoice_type",
+ *   admin_permission = "administer commerce_invoice",
  *   config_prefix = "commerce_invoice_type",
  *   bundle_of = "commerce_invoice",
  *   entity_keys = {

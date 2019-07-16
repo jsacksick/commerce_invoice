@@ -3,7 +3,6 @@
 namespace Drupal\commerce_invoice\Form;
 
 use Drupal\commerce\EntityTraitManagerInterface;
-use Drupal\commerce_invoice\Entity\InvoiceType;
 use Drupal\commerce\Form\CommerceBundleEntityFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -23,7 +22,7 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
   protected $workflowManager;
 
   /**
-   * Constructs a new OrderTypeForm object.
+   * Constructs a new InvoiceTypeForm object.
    *
    * @param \Drupal\commerce\EntityTraitManagerInterface $trait_manager
    *   The entity trait manager.
