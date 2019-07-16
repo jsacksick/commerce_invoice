@@ -27,13 +27,12 @@ class InvoiceItemTypeForm extends CommerceBundleEntityFormBase {
       '#type' => 'machine_name',
       '#default_value' => $invoice_item_type->id(),
       '#machine_name' => [
-        'exists' => '\Drupal\commerce_shipping\Entity\ShipmentType::load',
+        'exists' => '\Drupal\commerce_invoice\Entity\InvoiceItemType::load',
       ],
       '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
     ];
     $form = $this->buildTraitForm($form, $form_state);
-
-    return $this->protectBundleIdElement($form);
+    return $form;
   }
 
   /**
@@ -50,7 +49,7 @@ class InvoiceItemTypeForm extends CommerceBundleEntityFormBase {
     $this->entity->save();
     $this->submitTraitForm($form, $form_state);
 
-    $this->messenger()->addMessage($this->t('Saved the %label shipment type.', [
+    $this->messenger()->addMessage($this->t('Saved the %label invoice item type.', [
       '%label' => $this->entity->label(),
     ]));
     $form_state->setRedirect('entity.commerce_invoice_item_type.collection');

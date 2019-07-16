@@ -28,7 +28,7 @@ use Drupal\commerce\Entity\CommerceBundleEntityBase;
  *       "default" = "Drupal\entity\Routing\DefaultHtmlRouteProvider",
  *     },
  *   },
- *   admin_permission = "administer commerce_invoice",
+ *   admin_permission = "administer commerce_invoice_type",
  *   config_prefix = "commerce_invoice_item_type",
  *   bundle_of = "commerce_invoice_item",
  *   entity_keys = {

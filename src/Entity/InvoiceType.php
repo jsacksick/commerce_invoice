@@ -32,7 +32,7 @@ use Drupal\commerce\Entity\CommerceBundleEntityBase;
  *     },
  *     "list_builder" = "Drupal\commerce_invoice\InvoiceTypeListBuilder",
  *   },
- *   admin_permission = "administer commerce_invoice",
+ *   admin_permission = "administer commerce_invoice_type",
  *   config_prefix = "commerce_invoice_type",
  *   bundle_of = "commerce_invoice",
  *   entity_keys = {
