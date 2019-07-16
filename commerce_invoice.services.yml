@@ -1,0 +1,4 @@
+services:
+  commerce_invoice.invoice_generator:
+    class: Drupal\commerce_invoice\InvoiceGenerator
+    arguments: ['@entity_type.manager']
