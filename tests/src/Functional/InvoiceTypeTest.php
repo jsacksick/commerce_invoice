@@ -12,7 +12,7 @@ use Drupal\commerce_invoice\Entity\InvoiceType;
 class InvoiceTypeTest extends InvoiceBrowserTestBase {
 
   /**
-   * Tests whether the default order type was created.
+   * Tests whether the default invoice type was created.
    */
   public function testDefault() {
     $invoice_type = InvoiceType::load('default');
