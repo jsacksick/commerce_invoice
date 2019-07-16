@@ -47,6 +47,42 @@ interface InvoiceItemInterface extends ContentEntityInterface, EntityAdjustableI
   public function setTitle($title);
 
   /**
+   * Gets the invoice item description.
+   *
+   * @return string
+   *   The invoice item description.
+   */
+  public function getDescription();
+
+  /**
+   * Sets the invoice item description.
+   *
+   * @param string $description
+   *   The invoice item description.
+   *
+   * @return $this
+   */
+  public function setDescription($description);
+
+  /**
+   * Gets the text format name for the invoice item description.
+   *
+   * @return string
+   *   The text format name.
+   */
+  public function getFormat();
+
+  /**
+   * Sets the text format name for the invoice item description.
+   *
+   * @param string $format
+   *   The text format name.
+   *
+   * @return $this
+   */
+  public function setFormat($format);
+
+  /**
    * Gets the invoice item quantity.
    *
    * @return string

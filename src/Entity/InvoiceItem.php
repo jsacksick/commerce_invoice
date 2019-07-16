@@ -77,6 +77,36 @@ class InvoiceItem extends CommerceContentEntityBase implements InvoiceItemInterf
   /**
    * {@inheritdoc}
    */
+  public function getDescription() {
+    return $this->get('description')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setDescription($description) {
+    $this->set('description', $description);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormat() {
+    return $this->get('description')->format;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setFormat($format) {
+    $this->get('description')->format = $format;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getQuantity() {
     return (string) $this->get('quantity')->value;
   }
@@ -327,6 +357,15 @@ class InvoiceItem extends CommerceContentEntityBase implements InvoiceItemInterf
       ])
       ->setRequired(TRUE);
 
+    $fields['description'] = BaseFieldDefinition::create('text_long')
+      ->setLabel(t('Description'))
+      ->setDisplayOptions('view', [
+        'label' => 'hidden',
+        'type' => 'text_default',
+        'weight' => 0,
+      ])
+      ->setDisplayConfigurable('view', TRUE);
+
     $fields['quantity'] = BaseFieldDefinition::create('decimal')
       ->setLabel(t('Quantity'))
       ->setDescription(t('The number of purchased units.'))
@@ -334,39 +373,24 @@ class InvoiceItem extends CommerceContentEntityBase implements InvoiceItemInterf
       ->setSetting('unsigned', TRUE)
       ->setSetting('min', 0)
       ->setDefaultValue(1)
-      ->setDisplayOptions('form', [
-        'type' => 'commerce_quantity',
-        'weight' => 1,
-      ])
-      ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['unit_price'] = BaseFieldDefinition::create('commerce_price')
       ->setLabel(t('Unit price'))
       ->setDescription(t('The price of a single unit.'))
       ->setRequired(TRUE)
-      ->setDisplayOptions('form', [
-        'type' => 'commerce_unit_price',
-        'weight' => 2,
-        'settings' => [
-          'require_confirmation' => TRUE,
-        ],
-      ])
-      ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['total_price'] = BaseFieldDefinition::create('commerce_price')
       ->setLabel(t('Total price'))
       ->setDescription(t('The total price of the invoice item.'))
       ->setReadOnly(TRUE)
-      ->setDisplayConfigurable('form', FALSE)
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['adjustments'] = BaseFieldDefinition::create('commerce_adjustment')
       ->setLabel(t('Adjustments'))
       ->setRequired(FALSE)
       ->setCardinality(BaseFieldDefinition::CARDINALITY_UNLIMITED)
-      ->setDisplayConfigurable('form', FALSE)
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['data'] = BaseFieldDefinition::create('map')

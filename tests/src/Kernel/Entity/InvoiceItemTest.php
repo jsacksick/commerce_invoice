@@ -4,8 +4,10 @@ namespace Drupal\Tests\commerce_invoice\Kernel\Entity;
 
 use Drupal\commerce_order\Adjustment;
 use Drupal\commerce_invoice\Entity\InvoiceItem;
+use Drupal\commerce_order\Entity\OrderItem;
+use Drupal\commerce_order\Entity\OrderItemType;
 use Drupal\commerce_price\Price;
-use Drupal\Tests\commerce\Kernel\CommerceKernelTestBase;
+use Drupal\Tests\commerce_invoice\Kernel\InvoiceKernelTestBase;
 
 /**
  * Tests the invoice item entity.
@@ -14,38 +16,17 @@ use Drupal\Tests\commerce\Kernel\CommerceKernelTestBase;
  *
  * @group commerce_invoice
  */
-class InvoiceItemTest extends CommerceKernelTestBase {
-
-  /**
-   * Modules to enable.
-   *
-   * @var array
-   */
-  public static $modules = [
-    'entity_reference_revisions',
-    'profile',
-    'state_machine',
-    'commerce_order',
-    'commerce_invoice',
-  ];
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp() {
-    parent::setUp();
-
-    $this->installEntitySchema('profile');
-    $this->installEntitySchema('commerce_invoice');
-    $this->installEntitySchema('commerce_invoice_item');
-    $this->installConfig('commerce_invoice');
-  }
+class InvoiceItemTest extends InvoiceKernelTestBase {
 
   /**
    * Tests the invoice item entity and its methods.
    *
    * @covers ::getTitle
    * @covers ::setTitle
+   * @covers ::getDescription
+   * @covers ::setDescription
+   * @covers ::getFormat
+   * @covers ::setFormat
    * @covers ::getQuantity
    * @covers ::setQuantity
    * @covers ::getUnitPrice
@@ -63,6 +44,9 @@ class InvoiceItemTest extends CommerceKernelTestBase {
    * @covers ::unsetData
    * @covers ::getCreatedTime
    * @covers ::setCreatedTime
+   * @covers ::getOrderItem
+   * @covers ::getOrderItemId
+   * @covers ::populateFromOrderItem
    */
   public function testInvoiceItem() {
     $invoice_item = InvoiceItem::create([
@@ -72,6 +56,12 @@ class InvoiceItemTest extends CommerceKernelTestBase {
 
     $invoice_item->setTitle('My invoice item');
     $this->assertEquals('My invoice item', $invoice_item->getTitle());
+
+    $invoice_item->setDescription('Invoice item description');
+    $this->assertEquals('Invoice item description', $invoice_item->getDescription());
+
+    $invoice_item->setFormat('basic_html');
+    $this->assertEquals('basic_html', $invoice_item->getFormat());
 
     $this->assertEquals(1, $invoice_item->getQuantity());
     $invoice_item->setQuantity('2');
@@ -126,6 +116,31 @@ class InvoiceItemTest extends CommerceKernelTestBase {
 
     $invoice_item->setCreatedTime(635879700);
     $this->assertEquals(635879700, $invoice_item->getCreatedTime());
+
+    $invoice_item = InvoiceItem::create([
+      'type' => 'commerce_product_variation',
+    ]);
+    OrderItemType::create([
+      'id' => 'test',
+      'label' => 'Test',
+      'orderType' => 'default',
+    ])->save();
+    $order_item = OrderItem::create([
+      'type' => 'test',
+      'quantity' => 3,
+      'unit_price' => new Price('12.00', 'USD'),
+      'adjustments' => $adjustments,
+    ]);
+    $order_item->save();
+    /** @var \Drupal\commerce_order\Entity\OrderItemInterface $order_item */
+    $order_item = $this->reloadEntity($order_item);
+    $invoice_item->populateFromOrderItem($order_item);
+    $this->assertEquals($order_item, $invoice_item->getOrderItem());
+    $this->assertEquals($order_item->id(), $invoice_item->getOrderItemId());
+    $this->assertEquals($order_item->getQuantity(), $invoice_item->getQuantity());
+    $this->assertEquals($order_item->getUnitPrice(), $invoice_item->getUnitPrice());
+    $this->assertEquals($order_item->getTitle(), $invoice_item->getTitle());
+    $this->assertEquals($order_item->getAdjustments(), $invoice_item->getAdjustments());
   }
 
 }
