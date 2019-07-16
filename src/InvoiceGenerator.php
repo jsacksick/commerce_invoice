@@ -2,6 +2,8 @@
 
 namespace Drupal\commerce_invoice;
 
+use Drupal\commerce_order\Entity\OrderItemType;
+use Drupal\commerce_order\Entity\OrderType;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 class InvoiceGenerator implements InvoiceGeneratorInterface {
@@ -29,19 +31,25 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
   public function generate(array $orders) {
     $invoice_storage = $this->entityTypeManager->getStorage('commerce_invoice');
     $invoice_item_storage = $this->entityTypeManager->getStorage('commerce_invoice_item');
+    // Assume the order type from the first passed order, we'll use it
+    // to determine the invoice type to create.
+    $first_order = reset($orders);
+    /** @var \Drupal\commerce_order\Entity\OrderTypeInterface $order_type */
+    $order_type = OrderType::load($first_order->bundle());
+    $invoice_type = $order_type->getThirdPartySetting('commerce_invoice', 'invoice_type', 'default');
     /** @var \Drupal\commerce_invoice\Entity\InvoiceInterface $invoice */
-    // @todo: Define a type based on the order type.
-    $invoice = $invoice_storage->create(['type' => 'default']);
+    $invoice = $invoice_storage->create(['type' => $invoice_type]);
 
-    /** @var \Drupal\commerce_order\Entity\OrderInterface[] $orders */
     foreach ($orders as $order) {
       foreach ($order->getAdjustments() as $adjustment) {
         $invoice->addAdjustment($adjustment);
       }
       foreach ($order->getItems() as $order_item) {
-        // @todo: Figure out how to determine the invoice item type.
+        /** @var \Drupal\commerce_order\Entity\OrderItemTypeInterface $order_item_type */
+        $order_item_type = OrderItemType::load($order_item->bundle());
+        $invoice_item_type = $order_item_type->getPurchasableEntityTypeId() ?: 'default';
         /** @var \Drupal\commerce_invoice\Entity\InvoiceItemInterface $invoice_item */
-        $invoice_item = $invoice_item_storage->create(['type' => 'default']);
+        $invoice_item = $invoice_item_storage->create(['type' => $invoice_item_type]);
         $invoice_item->populateFromOrderItem($order_item);
         $invoice_item->save();
         $invoice->addItem($invoice_item);
@@ -49,7 +57,6 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
     }
     $invoice->setInvoiceNumber(mt_rand(1, 100));
     $invoice->save();
-
     return $invoice;
   }
 

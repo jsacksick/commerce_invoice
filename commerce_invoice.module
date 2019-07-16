@@ -5,8 +5,10 @@
  * Defines the Invoice entity and associated features.
  */
 
+use Drupal\commerce\EntityHelper;
 use Drupal\commerce\PurchasableEntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 
 /**
@@ -36,6 +38,42 @@ function commerce_invoice_get_purchasable_entity_types() {
   return array_filter($entity_types, function (EntityTypeInterface $entity_type) {
     return $entity_type->entityClassImplements(PurchasableEntityInterface::class);
   });
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for 'commerce_order_type_form'.
+ */
+function commerce_invoice_form_commerce_order_type_form_alter(array &$form, FormStateInterface $form_state) {
+  /** @var \Drupal\commerce_order\Entity\OrderTypeInterface $order_type */
+  $order_type = $form_state->getFormObject()->getEntity();
+  $invoice_type_storage = \Drupal::entityTypeManager()->getStorage('commerce_invoice_type');
+  $invoice_types = $invoice_type_storage->loadMultiple();
+
+  $form['commerce_invoice'] = [
+    '#type' => 'details',
+    '#title' => t('Invoice settings'),
+    '#weight' => 6,
+    '#open' => TRUE,
+  ];
+  $form['commerce_invoice']['invoice_type'] = [
+    '#type' => 'select',
+    '#title' => t('Invoice type'),
+    '#options' => EntityHelper::extractLabels($invoice_types),
+    '#default_value' => $order_type->getThirdPartySetting('commerce_invoice', 'invoice_type', 'default'),
+    '#required' => TRUE,
+  ];
+  $form['actions']['submit']['#submit'][] = 'commerce_invoice_order_type_form_submit';
+}
+
+/**
+ * Submission handler for commerce_invoice_form_commerce_order_type_form_alter().
+ */
+function commerce_invoice_order_type_form_submit($form, FormStateInterface $form_state) {
+  /** @var \Drupal\commerce_order\Entity\OrderTypeInterface $order_type */
+  $order_type = $form_state->getFormObject()->getEntity();
+  $settings = $form_state->getValue(['commerce_invoice']);
+  $order_type->setThirdPartySetting('commerce_invoice', 'invoice_type', $settings['invoice_type']);
+  $order_type->save();
 }
 
 /**

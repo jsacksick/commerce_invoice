@@ -5,3 +5,11 @@ commerce_invoice.commerce_invoice_type.*:
     workflow:
       type: string
       label: 'Workflow'
+
+commerce_order.commerce_order_type.*.third_party.commerce_invoice:
+  type: mapping
+  label: 'Invoice settings'
+  mapping:
+    invoice_type:
+      type: string
+      label: 'Invoice type'

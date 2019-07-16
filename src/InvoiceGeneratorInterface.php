@@ -7,6 +7,8 @@ interface InvoiceGeneratorInterface {
   /**
    * Generate an invoice for the given orders.
    *
+   * This logic assumes the orders passed are of the same type.
+   *
    * @param \Drupal\commerce_order\Entity\OrderInterface[] $orders
    *   The orders to generate an invoice for.
    *
