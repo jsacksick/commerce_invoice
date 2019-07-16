@@ -9,9 +9,3 @@ entity.commerce_invoice_type.collection:
   route_name: 'entity.commerce_invoice_type.collection'
   parent: 'commerce_invoice.configuration'
   description: 'Manage fields, form and display settings for your invoices.'
-
-entity.commerce_invoice_item_type.collection:
-  title: 'Invoice item types'
-  route_name: 'entity.commerce_invoice_item_type.collection'
-  parent: 'commerce_invoice.configuration'
-  description: 'Manage fields, form and display settings for your invoice items.'

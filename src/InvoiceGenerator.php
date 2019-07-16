@@ -39,7 +39,7 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
         $invoice->addAdjustment($adjustment);
       }
       foreach ($order->getItems() as $order_item) {
-        // @todo: Figure out how to define the invoice item type.
+        // @todo: Figure out how to determine the invoice item type.
         /** @var \Drupal\commerce_invoice\Entity\InvoiceItemInterface $invoice_item */
         $invoice_item = $invoice_item_storage->create(['type' => 'default']);
         $invoice_item->populateFromOrderItem($order_item);

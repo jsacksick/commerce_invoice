@@ -5,7 +5,3 @@ commerce_invoice.commerce_invoice_type.*:
     workflow:
       type: string
       label: 'Workflow'
-
-commerce_invoice.commerce_invoice_item_type.*:
-  type: commerce_config_entity_bundle
-  label: 'Invoice item type'

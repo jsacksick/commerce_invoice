@@ -39,8 +39,6 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *     "uuid" = "uuid",
  *     "label" = "title",
  *   },
- *   bundle_entity_type = "commerce_invoice_item_type",
- *   field_ui_base_route = "entity.commerce_invoice_item_type.edit_form",
  * )
  */
 class InvoiceItem extends CommerceContentEntityBase implements InvoiceItemInterface {
