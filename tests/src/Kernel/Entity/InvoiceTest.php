@@ -38,7 +38,7 @@ class InvoiceTest extends InvoiceKernelTestBase {
   }
 
   /**
-   * Tests the order entity and its methods.
+   * Tests the invoice entity and its methods.
    *
    * @covers ::getInvoiceNumber
    * @covers ::setInvoiceNumber

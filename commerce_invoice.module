@@ -7,6 +7,7 @@
 
 use Drupal\commerce\PurchasableEntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Render\Element;
 
 /**
  * Implements hook_entity_bundle_info().
@@ -35,4 +36,50 @@ function commerce_invoice_get_purchasable_entity_types() {
   return array_filter($entity_types, function (EntityTypeInterface $entity_type) {
     return $entity_type->entityClassImplements(PurchasableEntityInterface::class);
   });
+}
+
+/**
+ * Implements hook_theme().
+ */
+function commerce_invoice_theme() {
+  return [
+    'commerce_invoice' => [
+      'render element' => 'elements',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK().
+ */
+function commerce_invoice_theme_suggestions_commerce_invoice(array $variables) {
+  return _commerce_entity_theme_suggestions('commerce_invoice', $variables);
+}
+
+/**
+ * Prepares variables for invoice templates.
+ *
+ * Default template: commerce-invoice.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - elements: An associative array containing rendered fields.
+ *   - attributes: HTML attributes for the containing element.
+ */
+function template_preprocess_commerce_invoice(array &$variables) {
+  /** @var Drupal\commerce_invoice\Entity\InvoiceInterface $invoice */
+  $invoice = $variables['elements']['#commerce_invoice'];
+
+  $variables['invoice_entity'] = $invoice;
+  $variables['invoice'] = [];
+  foreach (Element::children($variables['elements']) as $key) {
+    $variables['invoice'][$key] = $variables['elements'][$key];
+  }
+  if ($invoice->getBillingProfile()) {
+    $profile_view_bulder = \Drupal::entityTypeManager()->getViewBuilder('profile');
+    $variables['billing_information'] = $profile_view_bulder->view($invoice->getBillingProfile());
+  }
+  /** @var \Drupal\commerce_invoice\InvoiceTotalSummaryInterface $invoice_total_summary */
+  $invoice_total_summary = \Drupal::service('commerce_invoice.invoice_total_summary');
+  $variables['totals'] = $invoice_total_summary->buildTotals($invoice);
 }

@@ -47,6 +47,7 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
         $invoice->addItem($invoice_item);
       }
     }
+    $invoice->setInvoiceNumber(mt_rand(1, 100));
     $invoice->save();
 
     return $invoice;

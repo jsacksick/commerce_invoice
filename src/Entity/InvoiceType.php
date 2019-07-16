@@ -85,7 +85,7 @@ class InvoiceType extends CommerceBundleEntityBase implements InvoiceTypeInterfa
   public function calculateDependencies() {
     parent::calculateDependencies();
 
-    // The order type must depend on the module that provides the workflow.
+    // The invoice type must depend on the module that provides the workflow.
     $workflow_manager = \Drupal::service('plugin.manager.workflow');
     $workflow = $workflow_manager->createInstance($this->getWorkflowId());
     $this->calculatePluginDependencies($workflow);

@@ -23,7 +23,7 @@ class InvoiceEvent extends Event {
    * Constructs a new InvoiceEvent.
    *
    * @param \Drupal\commerce_invoice\Entity\InvoiceInterface $invoice
-   *   The order.
+   *   The invoice.
    */
   public function __construct(InvoiceInterface $invoice) {
     $this->invoice = $invoice;

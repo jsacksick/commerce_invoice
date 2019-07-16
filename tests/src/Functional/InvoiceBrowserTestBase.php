@@ -5,7 +5,7 @@ namespace Drupal\Tests\commerce_invoice\Functional;
 use Drupal\Tests\commerce\Functional\CommerceBrowserTestBase;
 
 /**
- * Defines base class for commerce_order test cases.
+ * Defines base class for commerce_invoice test cases.
  */
 abstract class InvoiceBrowserTestBase extends CommerceBrowserTestBase {
 

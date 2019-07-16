@@ -21,7 +21,7 @@ class InvoiceItemEvent extends Event {
    * Constructs a new InvoiceItemEvent.
    *
    * @param \Drupal\commerce_invoice\Entity\InvoiceItemInterface $invoice_item
-   *   The order item.
+   *   The invoice item.
    */
   public function __construct(InvoiceItemInterface $invoice_item) {
     $this->invoiceItem = $invoice_item;
