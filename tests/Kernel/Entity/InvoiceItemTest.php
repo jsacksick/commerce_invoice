@@ -66,7 +66,7 @@ class InvoiceItemTest extends CommerceKernelTestBase {
    */
   public function testInvoiceItem() {
     $invoice_item = InvoiceItem::create([
-      'type' => 'default',
+      'type' => 'commerce_product_variation',
     ]);
     $invoice_item->save();
 

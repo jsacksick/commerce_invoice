@@ -1,0 +1,38 @@
+<?php
+
+/**
+ * @file
+ * Defines the Invoice entity and associated features.
+ */
+
+use Drupal\commerce\PurchasableEntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+
+/**
+ * Implements hook_entity_bundle_info().
+ */
+function commerce_invoice_entity_bundle_info() {
+  $purchasable_entity_types = commerce_invoice_get_purchasable_entity_types();
+  $bundles = [];
+  foreach ($purchasable_entity_types as $entity_type_id => $entity_type) {
+    $bundles['commerce_invoice_item'][$entity_type_id] = [
+      'label' => $entity_type->getLabel(),
+      'translatable' => FALSE,
+      'provider' => 'commerce_invoice',
+    ];
+  }
+  return $bundles;
+}
+
+/**
+ * Gets the purchasable entity types.
+ *
+ * @return \Drupal\Core\Entity\EntityTypeInterface[]
+ *   The purchasable entity types, keyed by entity type ID.
+ */
+function commerce_invoice_get_purchasable_entity_types() {
+  $entity_types = \Drupal::entityTypeManager()->getDefinitions();
+  return array_filter($entity_types, function (EntityTypeInterface $entity_type) {
+    return $entity_type->entityClassImplements(PurchasableEntityInterface::class);
+  });
+}
