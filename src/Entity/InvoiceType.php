@@ -21,6 +21,7 @@ use Drupal\commerce\Entity\CommerceBundleEntityBase;
  *     "access" = "Drupal\commerce\CommerceBundleAccessControlHandler",
  *     "form" = {
  *       "add" = "Drupal\commerce_invoice\Form\InvoiceTypeForm",
+ *       "duplicate" = "Drupal\commerce_invoice\Form\InvoiceTypeForm",
  *       "edit" = "Drupal\commerce_invoice\Form\InvoiceTypeForm",
  *       "delete" = "Drupal\commerce\Form\CommerceBundleEntityDeleteFormBase"
  *     },
