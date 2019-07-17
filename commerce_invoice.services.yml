@@ -6,3 +6,8 @@ services:
   commerce_invoice.invoice_total_summary:
     class: Drupal\commerce_invoice\InvoiceTotalSummary
     arguments: ['@commerce_order.adjustment_transformer']
+
+  commerce_invoice.entity_print_subscriber:
+    class: Drupal\commerce_invoice\EventSubscriber\EntityPrintSubscriber
+    tags:
+      - { name: event_subscriber }

@@ -9,5 +9,6 @@ dependencies:
   - commerce:commerce_price
   - commerce:commerce_store
   - entity:entity
+  - entity_print:entity_print
   - profile:profile
   - state_machine:state_machine

@@ -1,0 +1,68 @@
+.page {
+  font-family: arial,sans-serif;
+}
+h1#invoice-number {
+  border-bottom: 1px solid #cccccc;
+  margin: 10px 0;
+}
+div.invoice-header {
+  margin-top: 20px;
+  position: relative;
+  width: 100%;
+}
+div.invoice-info {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+table.invoice-table {
+  border-collapse: collapse;
+}
+table.invoice-table td {
+  border: 1px solid #ccc;
+  padding: 5px;
+}
+table.invoice-table td:first-child {
+  background: #eee;
+}
+div.billing-information {
+  display: inline-block;
+  width: 40%;
+}
+div.billing-information h3 {
+  margin: 0 0 10px 0;
+}
+div.billing-information p.address {
+  margin: 0;
+}
+div.invoice-items-container {
+  padding: 30px 0;
+}
+table.invoice-items {
+  border: 1px solid #cccccc;
+  border-collapse: collapse;
+  margin: 0;
+  width: 100%;
+}
+table.invoice-items th {
+  background: #eee;
+  border: 1px solid #ccc;
+  padding: 5px;
+  text-align: left;
+}
+table.invoice-items td {
+  border: 1px solid #ccc;
+  padding: 8px;
+}
+div.invoice-totals-container {
+  text-align: right;
+}
+div.invoice-totals {
+  display: inline-block;
+}
+div.invoice-totals tr {
+  text-align: right;
+}
+tr.invoice-total {
+  font-size: 24px;
+}
