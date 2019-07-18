@@ -44,6 +44,7 @@ use Drupal\commerce\Entity\CommerceBundleEntityBase;
  *   config_export = {
  *     "label",
  *     "id",
+ *     "footerText",
  *     "paymentTerms",
  *     "workflow",
  *     "traits",
@@ -60,6 +61,13 @@ use Drupal\commerce\Entity\CommerceBundleEntityBase;
 class InvoiceType extends CommerceBundleEntityBase implements InvoiceTypeInterface {
 
   /**
+   * The invoice type footer text.
+   *
+   * @var string
+   */
+  protected $footerText;
+
+  /**
    * The invoice type payment terms.
    *
    * @var string
@@ -72,6 +80,21 @@ class InvoiceType extends CommerceBundleEntityBase implements InvoiceTypeInterfa
    * @var string
    */
   protected $workflow;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFooterText() {
+    return $this->footerText;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setFooterText($footer_text) {
+    $this->footerText = $footer_text;
+    return $this;
+  }
 
   /**
    * {@inheritdoc}

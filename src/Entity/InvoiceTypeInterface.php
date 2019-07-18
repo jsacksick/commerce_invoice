@@ -10,6 +10,24 @@ use Drupal\commerce\Entity\CommerceBundleEntityInterface;
 interface InvoiceTypeInterface extends CommerceBundleEntityInterface {
 
   /**
+   * Gets the invoice type's footer text.
+   **
+   * @return string
+   *   The invoice type footer text.
+   */
+  public function getFooterText();
+
+  /**
+   * Sets the payment terms of the invoice type.
+   *
+   * @param string $footer_text
+   *   The footer text.
+   *
+   * @return $this
+   */
+  public function setFooterText($footer_text);
+
+  /**
    * Gets the invoice type's payment terms.
    **
    * @return string

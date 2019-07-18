@@ -3,6 +3,7 @@ status: true
 dependencies: {  }
 label: Default
 id: default
+footerText: ''
 paymentTerms: ''
 workflow: invoice_default
 traits: {  }

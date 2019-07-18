@@ -76,6 +76,12 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
       '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
       '#disabled' => !$invoice_type->isNew(),
     ];
+    $form['footerText'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Footer text'),
+      '#default_value' => $invoice_type->getFooterText(),
+      '#description' => $this->t('Text to display in the footer of the invoice.'),
+    ];
     $form['paymentTerms'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Payment terms'),

@@ -33,12 +33,14 @@ class InvoiceTypeTest extends InvoiceBrowserTestBase {
     $edit = [
       'id' => 'foo',
       'label' => 'Foo',
+      'footerText' => $this->randomString(),
       'paymentTerms' => 'payment terms!',
     ];
     $this->submitForm($edit, t('Save'));
     $this->assertSession()->pageTextContains('Saved the Foo invoice type.');
 
     $invoice_type = InvoiceType::load('foo');
+    $this->assertEquals($edit['footerText'], $invoice_type->getFooterText());
     $this->assertEquals($edit['paymentTerms'], $invoice_type->getPaymentTerms());
     $this->assertNotEmpty($invoice_type);
   }
@@ -50,6 +52,7 @@ class InvoiceTypeTest extends InvoiceBrowserTestBase {
     $this->drupalGet('admin/commerce/config/invoice-types/default/edit');
     $edit = [
       'label' => 'Default!',
+      'footerText' => $this->randomString(),
       'paymentTerms' => $this->randomString(),
     ];
     $this->submitForm($edit, 'Save');
@@ -58,6 +61,7 @@ class InvoiceTypeTest extends InvoiceBrowserTestBase {
     $invoice_type = InvoiceType::load('default');
     $this->assertNotEmpty($invoice_type);
     $this->assertEquals($edit['label'], $invoice_type->label());
+    $this->assertEquals($edit['footerText'], $invoice_type->getFooterText());
     $this->assertEquals($edit['paymentTerms'], $invoice_type->getPaymentTerms());
   }
 

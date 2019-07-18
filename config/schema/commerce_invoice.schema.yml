@@ -2,6 +2,12 @@ commerce_invoice.commerce_invoice_type.*:
   type: commerce_config_entity_bundle
   label: 'Invoice type'
   mapping:
+    footerText:
+      type: text
+      label: 'Footer text'
+    paymentTerms:
+      type: text
+      label: 'Payment terms'
     workflow:
       type: string
       label: 'Workflow'
