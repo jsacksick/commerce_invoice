@@ -7,6 +7,7 @@ use Drupal\commerce\Form\CommerceBundleEntityFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\entity\Form\EntityDuplicateFormTrait;
+use Drupal\language\Entity\ContentLanguageSettings;
 use Drupal\state_machine\WorkflowManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -75,6 +76,12 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
       '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
       '#disabled' => !$invoice_type->isNew(),
     ];
+    $form['paymentTerms'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Payment terms'),
+      '#default_value' => $invoice_type->getPaymentTerms(),
+      '#description' => $this->t('The payment terms.'),
+    ];
     $form['workflow'] = [
       '#type' => 'select',
       '#title' => $this->t('Workflow'),
@@ -83,6 +90,23 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
       '#description' => $this->t('Used by all invoices of this type.'),
     ];
     $form = $this->buildTraitForm($form, $form_state);
+
+    if ($this->moduleHandler->moduleExists('language')) {
+      $form['language'] = [
+        '#type' => 'details',
+        '#title' => $this->t('Language settings'),
+        '#group' => 'additional_settings',
+      ];
+      $form['language']['language_configuration'] = [
+        '#type' => 'language_configuration',
+        '#entity_information' => [
+          'entity_type' => 'commerce_invoice',
+          'bundle' => $invoice_type->id(),
+        ],
+        '#default_value' => ContentLanguageSettings::loadByEntityTypeBundle('commerce_invoice', $invoice_type->id()),
+      ];
+      $form['#submit'][] = 'language_configuration_element_submit';
+    }
 
     return $form;
   }

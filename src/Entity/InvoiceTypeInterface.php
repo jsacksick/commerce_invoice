@@ -10,6 +10,24 @@ use Drupal\commerce\Entity\CommerceBundleEntityInterface;
 interface InvoiceTypeInterface extends CommerceBundleEntityInterface {
 
   /**
+   * Gets the invoice type's payment terms.
+   **
+   * @return string
+   *   The invoice type payment terms.
+   */
+  public function getPaymentTerms();
+
+  /**
+   * Sets the payment terms of the invoice type.
+   *
+   * @param string $payment_terms
+   *   The payment terms.
+   *
+   * @return $this
+   */
+  public function setPaymentTerms($payment_terms);
+
+  /**
    * Gets the invoice type's workflow ID.
    *
    * Used by the $invoice->state field.

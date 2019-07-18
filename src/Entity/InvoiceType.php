@@ -44,6 +44,7 @@ use Drupal\commerce\Entity\CommerceBundleEntityBase;
  *   config_export = {
  *     "label",
  *     "id",
+ *     "paymentTerms",
  *     "workflow",
  *     "traits",
  *   },
@@ -59,11 +60,33 @@ use Drupal\commerce\Entity\CommerceBundleEntityBase;
 class InvoiceType extends CommerceBundleEntityBase implements InvoiceTypeInterface {
 
   /**
+   * The invoice type payment terms.
+   *
+   * @var string
+   */
+  protected $paymentTerms;
+
+  /**
    * The invoice type workflow ID.
    *
    * @var string
    */
   protected $workflow;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getPaymentTerms() {
+    return $this->paymentTerms;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setPaymentTerms($payment_terms) {
+    $this->paymentTerms = $payment_terms;
+    return $this;
+  }
 
   /**
    * {@inheritdoc}
