@@ -66,6 +66,30 @@ class InvoiceTypeTest extends InvoiceBrowserTestBase {
   }
 
   /**
+   * Tests duplicating an invoice type.
+   */
+  public function testDuplicate() {
+    $this->drupalGet('admin/commerce/config/invoice-types/default/duplicate');
+    $this->assertSession()->fieldValueEquals('label', 'Default');
+    $edit = [
+      'label' => $this->randomString(),
+      'id' => $this->randomMachineName(),
+    ];
+    $this->submitForm($edit, t('Save'));
+    $this->assertSession()->pageTextContains(t('Saved the @name invoice type.', ['@name' => $edit['label']]));
+
+    // Confirm that the original invoice type is unchanged.
+    $invoice_type = InvoiceType::load('default');
+    $this->assertNotEmpty($invoice_type);
+    $this->assertEquals('Default', $invoice_type->label());
+
+    // Confirm that the new invoice type has the expected data.
+    $invoice_type = InvoiceType::load($edit['id']);
+    $this->assertNotEmpty($invoice_type);
+    $this->assertEquals($edit['label'], $invoice_type->label());
+  }
+
+  /**
    * Tests deleting an invoice type.
    */
   public function testDelete() {
