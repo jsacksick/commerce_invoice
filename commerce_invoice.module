@@ -7,6 +7,7 @@
 
 use Drupal\commerce\EntityHelper;
 use Drupal\commerce\PurchasableEntityInterface;
+use Drupal\commerce_invoice\Entity\InvoiceType;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
@@ -107,6 +108,7 @@ function commerce_invoice_theme_suggestions_commerce_invoice(array $variables) {
 function template_preprocess_commerce_invoice(array &$variables) {
   /** @var Drupal\commerce_invoice\Entity\InvoiceInterface $invoice */
   $invoice = $variables['elements']['#commerce_invoice'];
+  $variables['invoice_type'] = InvoiceType::load($invoice->bundle());
 
   $variables['invoice_entity'] = $invoice;
   $variables['invoice'] = [];

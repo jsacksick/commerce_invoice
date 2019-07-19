@@ -28,7 +28,7 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
   /**
    * {@inheritdoc}
    */
-  public function generate(array $orders) {
+  public function generate(array $orders, array $values = []) {
     $invoice_storage = $this->entityTypeManager->getStorage('commerce_invoice');
     $invoice_item_storage = $this->entityTypeManager->getStorage('commerce_invoice_item');
     // Assume the order type from the first passed order, we'll use it
@@ -36,9 +36,11 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
     $first_order = reset($orders);
     /** @var \Drupal\commerce_order\Entity\OrderTypeInterface $order_type */
     $order_type = OrderType::load($first_order->bundle());
-    $invoice_type = $order_type->getThirdPartySetting('commerce_invoice', 'invoice_type', 'default');
+    $values += [
+      'type' => $order_type->getThirdPartySetting('commerce_invoice', 'invoice_type', 'default'),
+    ];
     /** @var \Drupal\commerce_invoice\Entity\InvoiceInterface $invoice */
-    $invoice = $invoice_storage->create(['type' => $invoice_type]);
+    $invoice = $invoice_storage->create($values);
 
     foreach ($orders as $order) {
       foreach ($order->getAdjustments() as $adjustment) {
@@ -55,7 +57,9 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
         $invoice->addItem($invoice_item);
       }
     }
-    $invoice->setInvoiceNumber(mt_rand(1, 100));
+    if (empty($invoice->getInvoiceNumber())) {
+      $invoice->setInvoiceNumber(mt_rand(1, 100));
+    }
     $invoice->save();
     return $invoice;
   }

@@ -66,3 +66,11 @@ div.invoice-totals tr {
 tr.invoice-total {
   font-size: 24px;
 }
+div.invoice-payment-terms {
+  margin-top: 20px;
+}
+div.invoice-footer {
+  border-top: 1px solid #ccc;
+  margin-top: 20px;
+  padding-top: 10px;
+}
