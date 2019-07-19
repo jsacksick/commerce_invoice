@@ -5,6 +5,7 @@ namespace Drupal\commerce_invoice;
 use Drupal\commerce_order\Entity\OrderItemType;
 use Drupal\commerce_order\Entity\OrderType;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\profile\Entity\ProfileInterface;
 
 class InvoiceGenerator implements InvoiceGeneratorInterface {
 
@@ -28,7 +29,7 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
   /**
    * {@inheritdoc}
    */
-  public function generate(array $orders, array $values = []) {
+  public function generate(array $orders, ProfileInterface $profile, array $values = []) {
     $invoice_storage = $this->entityTypeManager->getStorage('commerce_invoice');
     $invoice_item_storage = $this->entityTypeManager->getStorage('commerce_invoice_item');
     // Assume the order type from the first passed order, we'll use it
@@ -41,6 +42,9 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
     ];
     /** @var \Drupal\commerce_invoice\Entity\InvoiceInterface $invoice */
     $invoice = $invoice_storage->create($values);
+    $billing_profile = $profile->createDuplicate();
+    $billing_profile->save();
+    $invoice->setBillingProfile($billing_profile);
 
     foreach ($orders as $order) {
       foreach ($order->getAdjustments() as $adjustment) {
