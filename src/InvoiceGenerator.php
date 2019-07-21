@@ -46,6 +46,8 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
     $billing_profile->save();
     $invoice->setBillingProfile($billing_profile);
 
+    $total_paid = NULL;
+    /** @var \Drupal\commerce_order\Entity\OrderInterface[] $orders */
     foreach ($orders as $order) {
       foreach ($order->getAdjustments() as $adjustment) {
         $invoice->addAdjustment($adjustment);
@@ -60,10 +62,14 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
         $invoice_item->save();
         $invoice->addItem($invoice_item);
       }
+      $total_paid = $total_paid ? $total_paid->add($order->getTotalPaid()) : $order->getTotalPaid();
     }
+    // @todo: Remove this once we have a mechanism for generating invoice
+    // numbers.
     if (empty($invoice->getInvoiceNumber())) {
       $invoice->setInvoiceNumber(mt_rand(1, 100));
     }
+    $invoice->setTotalPaid($total_paid);
     $invoice->save();
     return $invoice;
   }

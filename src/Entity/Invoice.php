@@ -4,6 +4,7 @@ namespace Drupal\commerce_invoice\Entity;
 
 use Drupal\commerce\Entity\CommerceContentEntityBase;
 use Drupal\commerce_order\Adjustment;
+use Drupal\commerce_price\Price;
 use Drupal\commerce_store\Entity\StoreInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityChangedTrait;
@@ -31,7 +32,7 @@ use Drupal\user\UserInterface;
  *   bundle_label = @Translation("Invoice type"),
  *   handlers = {
  *     "event" = "Drupal\commerce_invoice\Event\InvoiceEvent",
- *     "storage" = "Drupal\commerce\CommerceContentEntityStorage",
+ *     "storage" = "Drupal\commerce_invoice\InvoiceStorage",
  *     "views_data" = "Drupal\commerce\CommerceEntityViewsData",
  *     "form" = {
  *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
@@ -341,8 +342,80 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
   /**
    * {@inheritdoc}
    */
+  public function getTotalPaid() {
+    if (!$this->get('total_paid')->isEmpty()) {
+      return $this->get('total_paid')->first()->toPrice();
+    }
+    elseif ($total_price = $this->getTotalPrice()) {
+      return new Price('0', $total_price->getCurrencyCode());
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setTotalPaid(Price $total_paid) {
+    $this->set('total_paid', $total_paid);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getBalance() {
+    if ($total_price = $this->getTotalPrice()) {
+      return $total_price->subtract($this->getTotalPaid());
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isPaid() {
+    $total_price = $this->getTotalPrice();
+    if (!$total_price) {
+      return FALSE;
+    }
+
+    $balance = $this->getBalance();
+    return $balance->isNegative() || $balance->isZero();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getState() {
     return $this->get('state')->first();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getData($key, $default = NULL) {
+    $data = [];
+    if (!$this->get('data')->isEmpty()) {
+      $data = $this->get('data')->first()->getValue();
+    }
+    return isset($data[$key]) ? $data[$key] : $default;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setData($key, $value) {
+    $this->get('data')->__set($key, $value);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function unsetData($key) {
+    if (!$this->get('data')->isEmpty()) {
+      $data = $this->get('data')->first()->getValue();
+      unset($data[$key]);
+      $this->set('data', $data);
+    }
+    return $this;
   }
 
   /**
@@ -374,6 +447,32 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
   public function setDueDate(DrupalDateTime $start_date) {
     $this->get('due_date')->value = $start_date->format('Y-m-d');
     return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preSave(EntityStorageInterface $storage) {
+    parent::preSave($storage);
+
+    $customer = $this->getCustomer();
+    // The customer has been deleted, clear the reference.
+    if ($this->getCustomerId() && $customer->isAnonymous()) {
+      $this->setCustomerId(0);
+    }
+    // Make sure the billing profile is owned by the invoice, not the customer.
+    $billing_profile = $this->getBillingProfile();
+    if ($billing_profile && $billing_profile->getOwnerId()) {
+      $billing_profile->setOwnerId(0);
+      $billing_profile->save();
+    }
+
+    if ($this->getState()->getId() == 'pending') {
+      // Initialize the flag for InvoiceStorage::doInvoicePreSave().
+      if ($this->getData('paid_event_dispatched') === NULL) {
+        $this->setData('paid_event_dispatched', FALSE);
+      }
+    }
   }
 
   /**
@@ -464,12 +563,20 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
       ->setDescription(t('The total price of the invoice.'))
       ->setReadOnly(TRUE);
 
+    $fields['total_paid'] = BaseFieldDefinition::create('commerce_price')
+      ->setLabel(t('Total paid'))
+      ->setDescription(t('The total paid price of the invoice.'));
+
     $fields['state'] = BaseFieldDefinition::create('state')
       ->setLabel(t('State'))
       ->setDescription(t('The invoice state.'))
       ->setRequired(TRUE)
       ->setSetting('max_length', 255)
       ->setSetting('workflow_callback', ['\Drupal\commerce_invoice\Entity\Invoice', 'getWorkflowId']);
+
+    $fields['data'] = BaseFieldDefinition::create('map')
+      ->setLabel(t('Data'))
+      ->setDescription(t('A serialized array of additional data.'));
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'))

@@ -20,6 +20,7 @@ abstract class InvoiceKernelTestBase extends CommerceKernelTestBase {
     'state_machine',
     'commerce_order',
     'commerce_invoice',
+    'commerce_invoice_test',
   ];
 
   /**

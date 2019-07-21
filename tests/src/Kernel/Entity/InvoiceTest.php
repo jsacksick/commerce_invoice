@@ -65,7 +65,14 @@ class InvoiceTest extends InvoiceKernelTestBase {
    * @covers ::collectAdjustments
    * @covers ::recalculateTotalPrice
    * @covers ::getTotalPrice
+   * @covers ::getTotalPaid
+   * @covers ::setTotalPaid
+   * @covers ::getBalance
+   * @covers ::isPaid
    * @covers ::getState
+   * @covers ::getData
+   * @covers ::setData
+   * @covers ::unsetData
    * @covers ::getCreatedTime
    * @covers ::setCreatedTime
    * @covers ::getChangedTime
@@ -187,7 +194,34 @@ class InvoiceTest extends InvoiceKernelTestBase {
     $this->assertEquals([$adjustments[0]], $invoice->collectAdjustments(['custom']));
     $this->assertEquals([$adjustments[1]], $invoice->collectAdjustments(['fee']));
 
+    $this->assertEquals(new Price('0', 'USD'), $invoice->getTotalPaid());
+    $this->assertEquals(new Price('17.00', 'USD'), $invoice->getBalance());
+    $this->assertFalse($invoice->isPaid());
+
+    $invoice->setTotalPaid(new Price('7.00', 'USD'));
+    $this->assertEquals(new Price('7.00', 'USD'), $invoice->getTotalPaid());
+    $this->assertEquals(new Price('10.00', 'USD'), $invoice->getBalance());
+    $this->assertFalse($invoice->isPaid());
+
+    $invoice->setTotalPaid(new Price('17.00', 'USD'));
+    $this->assertEquals(new Price('17.00', 'USD'), $invoice->getTotalPaid());
+    $this->assertEquals(new Price('0', 'USD'), $invoice->getBalance());
+    $this->assertTrue($invoice->isPaid());
+
+    $invoice->setTotalPaid(new Price('27.00', 'USD'));
+    $this->assertEquals(new Price('27.00', 'USD'), $invoice->getTotalPaid());
+    $this->assertEquals(new Price('-10.00', 'USD'), $invoice->getBalance());
+    $this->assertTrue($invoice->isPaid());
+
     $this->assertEquals('pending', $invoice->getState()->getId());
+
+    $this->assertEquals('default', $invoice->getData('test', 'default'));
+    $invoice->setData('test', 'value');
+    $this->assertEquals('value', $invoice->getData('test', 'default'));
+    $invoice->unsetData('test');
+    $this->assertNull($invoice->getData('test'));
+    $this->assertEquals('default', $invoice->getData('test', 'default'));
+
     $invoice->setCreatedTime(635879700);
     $this->assertEquals(635879700, $invoice->getCreatedTime());
 
@@ -196,6 +230,123 @@ class InvoiceTest extends InvoiceKernelTestBase {
 
     $invoice->setDueDate(new DrupalDateTime('2017-01-01'));
     $this->assertEquals('2017-01-01', $invoice->getDueDate()->format('Y-m-d'));
+  }
+
+  /**
+   * Tests the invoice total recalculation logic.
+   *
+   * @covers ::recalculateTotalPrice
+   */
+  public function testTotalCalculation() {
+    $invoice = Invoice::create([
+      'type' => 'default',
+    ]);
+    $invoice->save();
+
+    /** @var \Drupal\commerce_invoice\Entity\InvoiceItemInterface $invoice_item */
+    $invoice_item = InvoiceItem::create([
+      'type' => 'commerce_product_variation',
+      'quantity' => '2',
+      'unit_price' => new Price('2.00', 'USD'),
+    ]);
+    $invoice_item->save();
+    $invoice_item = $this->reloadEntity($invoice_item);
+    /** @var \Drupal\commerce_invoice\Entity\InvoiceItemInterface $another_invoice_item */
+    $another_invoice_item = InvoiceItem::create([
+      'type' => 'commerce_product_variation',
+      'quantity' => '1',
+      'unit_price' => new Price('3.00', 'USD'),
+    ]);
+    $another_invoice_item->save();
+    $another_invoice_item = $this->reloadEntity($another_invoice_item);
+
+    $adjustments = [];
+    $adjustments[0] = new Adjustment([
+      'type' => 'tax',
+      'label' => 'Tax',
+      'amount' => new Price('100.00', 'USD'),
+      'included' => TRUE,
+    ]);
+    $adjustments[1] = new Adjustment([
+      'type' => 'tax',
+      'label' => 'Tax',
+      'amount' => new Price('2.121', 'USD'),
+      'source_id' => 'us_sales_tax',
+    ]);
+    $adjustments[2] = new Adjustment([
+      'type' => 'tax',
+      'label' => 'Tax',
+      'amount' => new Price('5.344', 'USD'),
+      'source_id' => 'us_sales_tax',
+    ]);
+
+    // Included adjustments do not affect the invoice total.
+    $invoice->addAdjustment($adjustments[0]);
+    $invoice_item->addAdjustment($adjustments[1]);
+    $another_invoice_item->addAdjustment($adjustments[2]);
+    $invoice->setItems([$invoice_item, $another_invoice_item]);
+    $invoice->save();
+    /** @var \Drupal\commerce_invoice\Entity\InvoiceInterface $invoice */
+    $invoice = $this->reloadEntity($invoice);
+
+    $collected_adjustments = $invoice->collectAdjustments();
+    $this->assertCount(3, $collected_adjustments);
+    $this->assertEquals($adjustments[1], $collected_adjustments[0]);
+    $this->assertEquals($adjustments[2], $collected_adjustments[1]);
+    $this->assertEquals($adjustments[0], $collected_adjustments[2]);
+    // The total will be correct only if the adjustments were correctly
+    // combined, and rounded.
+    $this->assertEquals(new Price('14.47', 'USD'), $invoice->getTotalPrice());
+
+    // Test handling deleted invoice items + non-inclusive adjustments.
+    $invoice->addAdjustment($adjustments[1]);
+    $invoice_item->delete();
+    $another_invoice_item->delete();
+    $invoice->recalculateTotalPrice();
+    $this->assertNull($invoice->getTotalPrice());
+  }
+
+  /**
+   * Tests that the paid event is dispatched when the balance reaches zero.
+   */
+  public function testPaidEvent() {
+    /** @var \Drupal\commerce_invoice\Entity\InvoiceItemInterface $invoice_item */
+    $invoice_item = InvoiceItem::create([
+      'type' => 'commerce_product_variation',
+      'quantity' => '2',
+      'unit_price' => new Price('10.00', 'USD'),
+    ]);
+    $invoice_item->save();
+    /** @var \Drupal\commerce_invoice\Entity\InvoiceInterface $invoice */
+    $invoice = Invoice::create([
+      'type' => 'default',
+      'store_id' => $this->store->id(),
+      'invoice_items' => [$invoice_item],
+    ]);
+    $invoice->save();
+    $this->assertNull($invoice->getData('invoice_test_called'));
+
+    $invoice->setTotalPaid(new Price('20.00', 'USD'));
+    $invoice->save();
+    $this->assertEquals(1, $invoice->getData('invoice_test_called'));
+
+    // Confirm that the event is not dispatched the second time the balance
+    // reaches zero.
+    $invoice->setTotalPaid(new Price('10.00', 'USD'));
+    $invoice->save();
+    $invoice->setTotalPaid(new Price('20.00', 'USD'));
+    $invoice->save();
+    $this->assertEquals(1, $invoice->getData('invoice_test_called'));
+
+    // Confirm that the event is dispatched for invoices created as paid.
+    $another_invoice = Invoice::create([
+      'type' => 'default',
+      'store_id' => $this->store->id(),
+      'invoice_items' => [$invoice_item],
+      'total_paid' => new Price('20.00', 'USD'),
+    ]);
+    $another_invoice->save();
+    $this->assertEquals(1, $another_invoice->getData('invoice_test_called'));
   }
 
 }

@@ -3,6 +3,7 @@
 namespace Drupal\commerce_invoice\Entity;
 
 use Drupal\commerce_order\EntityAdjustableInterface;
+use Drupal\commerce_price\Price;
 use Drupal\commerce_store\Entity\StoreInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\ContentEntityInterface;
@@ -231,12 +232,77 @@ interface InvoiceInterface extends ContentEntityInterface, EntityAdjustableInter
   public function getTotalPrice();
 
   /**
+   * Gets the total paid price.
+   *
+   * @return \Drupal\commerce_price\Price|null
+   *   The total paid price, or NULL.
+   */
+  public function getTotalPaid();
+
+  /**
+   * Sets the total paid price.
+   *
+   * @param \Drupal\commerce_price\Price $total_paid
+   *   The total paid price.
+   */
+  public function setTotalPaid(Price $total_paid);
+
+  /**
+   * Gets the invoice balance.
+   *
+   * Calculated by subtracting the total paid price from the total price.
+   * Can be negative in case the invoice was overpaid.
+   *
+   * @return \Drupal\commerce_price\Price|null
+   *   The invoice balance, or NULL.
+   */
+  public function getBalance();
+
+  /**
+   * Gets whether the invoice has been fully paid.
+   *
+   * Invoices are considered fully paid once their balance
+   * becomes zero or negative.
+   *
+   * @return bool
+   *   TRUE if the invoice has been fully paid, FALSE otherwise.
+   */
+  public function isPaid();
+
+  /**
    * Gets the invoice state.
    *
    * @return \Drupal\state_machine\Plugin\Field\FieldType\StateItemInterface
    *   The invoice state.
    */
   public function getState();
+
+  /**
+   * Gets an invoice data value with the given key.
+   *
+   * Used to store temporary data.
+   *
+   * @param string $key
+   *   The key.
+   * @param mixed $default
+   *   The default value.
+   *
+   * @return mixed
+   *   The value.
+   */
+  public function getData($key, $default = NULL);
+
+  /**
+   * Sets an invoice data value with the given key.
+   *
+   * @param string $key
+   *   The key.
+   * @param mixed $value
+   *   The value.
+   *
+   * @return $this
+   */
+  public function setData($key, $value);
 
   /**
    * Gets the invoice creation timestamp.
