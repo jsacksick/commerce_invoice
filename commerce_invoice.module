@@ -108,7 +108,20 @@ function commerce_invoice_theme_suggestions_commerce_invoice(array $variables) {
 function template_preprocess_commerce_invoice(array &$variables) {
   /** @var Drupal\commerce_invoice\Entity\InvoiceInterface $invoice */
   $invoice = $variables['elements']['#commerce_invoice'];
-  $variables['invoice_type'] = InvoiceType::load($invoice->bundle());
+  $token_service = \Drupal::token();
+  $invoice_type = InvoiceType::load($invoice->bundle());
+  $variables['invoice_type'] = $invoice_type;
+
+  // Replace the tokens in the footer text + the payment terms.
+  $data = ['commerce_invoice' => $invoice];
+  $footer_text = $invoice_type->getFooterText();
+  if ($footer_text) {
+    $variables['footer_text'] = $token_service->replace($footer_text, $data);
+  }
+  $payment_terms = $invoice_type->getPaymentTerms();
+  if ($payment_terms) {
+    $variables['payment_terms'] = $token_service->replace($payment_terms, $data);
+  }
 
   $variables['invoice_entity'] = $invoice;
   $variables['invoice'] = [];

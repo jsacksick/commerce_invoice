@@ -18,8 +18,6 @@
  * @ingroup themeable
  */
 #}
-{% set payment_terms = invoice_type.getPaymentTerms %}
-{% set invoice_footer = invoice_type.getFooterText %}
 <h1 id="invoice-number">{{ 'Invoice @number'|t({'@number': invoice_entity.getInvoiceNumber}) }}</h1>
 <div class="invoice-header">
   {% if (billing_information) %}
@@ -112,8 +110,8 @@
     {{ payment_terms }}
   </div>
 {% endif %}
-{% if (invoice_footer) %}
+{% if (footer_text) %}
   <div class="invoice-footer">
-    {{ invoice_footer }}
+    {{ footer_text }}
   </div>
 {% endif %}

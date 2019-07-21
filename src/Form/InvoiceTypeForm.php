@@ -4,6 +4,7 @@ namespace Drupal\commerce_invoice\Form;
 
 use Drupal\commerce\EntityTraitManagerInterface;
 use Drupal\commerce\Form\CommerceBundleEntityFormBase;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\entity\Form\EntityDuplicateFormTrait;
@@ -19,6 +20,13 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
   use EntityDuplicateFormTrait;
 
   /**
+   * The module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
    * The workflow manager.
    *
    * @var \Drupal\state_machine\WorkflowManagerInterface
@@ -30,12 +38,14 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
    *
    * @param \Drupal\commerce\EntityTraitManagerInterface $trait_manager
    *   The entity trait manager.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler.
    * @param \Drupal\state_machine\WorkflowManagerInterface $workflow_manager
    *   The workflow manager.
    */
-  public function __construct(EntityTraitManagerInterface $trait_manager, WorkflowManagerInterface $workflow_manager) {
+  public function __construct(EntityTraitManagerInterface $trait_manager, ModuleHandlerInterface $module_handler, WorkflowManagerInterface $workflow_manager) {
     parent::__construct($trait_manager);
-
+    $this->moduleHandler = $module_handler;
     $this->workflowManager = $workflow_manager;
   }
 
@@ -45,6 +55,7 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('plugin.manager.commerce_entity_trait'),
+      $container->get('module_handler'),
       $container->get('plugin.manager.workflow')
     );
   }
@@ -76,18 +87,43 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
       '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
       '#disabled' => !$invoice_type->isNew(),
     ];
+    $token_types = ['commerce_invoice'];
+    $token_exists = $this->moduleHandler->moduleExists('token');
     $form['footerText'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Footer text'),
       '#default_value' => $invoice_type->getFooterText(),
       '#description' => $this->t('Text to display in the footer of the invoice.'),
     ];
+    // Allow inserting tokens if the token module exists.
+    if ($token_exists) {
+      $form['footerText'] += [
+        '#element_validate' => ['token_element_validate'],
+        '#token_types' => $token_types,
+      ];
+      $form['footer_text_token_help'] = [
+        '#theme' => 'token_tree_link',
+        '#token_types' => $token_types,
+      ];
+    }
     $form['paymentTerms'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Payment terms'),
       '#default_value' => $invoice_type->getPaymentTerms(),
       '#description' => $this->t('The payment terms.'),
+      '#element_validate' => ['token_element_validate'],
+      '#token_types' => $token_types,
     ];
+    if ($token_exists) {
+      $form['paymentTerms'] += [
+        '#element_validate' => ['token_element_validate'],
+        '#token_types' => $token_types,
+      ];
+      $form['payment_terms_token_help'] = [
+        '#theme' => 'token_tree_link',
+        '#token_types' => $token_types,
+      ];
+    }
     $form['workflow'] = [
       '#type' => 'select',
       '#title' => $this->t('Workflow'),
