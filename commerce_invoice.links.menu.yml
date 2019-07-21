@@ -4,6 +4,13 @@ commerce_invoice.configuration:
   parent: 'commerce.configuration'
   weight: -5
 
+entity.commerce_invoice.collection:
+  title: 'Invoices'
+  route_name: 'entity.commerce_invoice.collection'
+  parent: 'commerce.admin_commerce'
+  description: 'Manage your invoices.'
+  weight: 5
+
 entity.commerce_invoice_type.collection:
   title: 'Invoice types'
   route_name: 'entity.commerce_invoice_type.collection'

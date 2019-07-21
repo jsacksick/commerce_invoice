@@ -33,11 +33,19 @@ use Drupal\user\UserInterface;
  *   handlers = {
  *     "event" = "Drupal\commerce_invoice\Event\InvoiceEvent",
  *     "storage" = "Drupal\commerce_invoice\InvoiceStorage",
+ *     "list_builder" = "Drupal\commerce_invoice\InvoiceListBuilder",
+ *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
  *     "views_data" = "Drupal\commerce\CommerceEntityViewsData",
  *     "form" = {
+ *       "generate" = "Drupal\commerce_invoice\Form\InvoiceGenerateForm",
  *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
  *     },
- *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
+ *     "local_task_provider" = {
+ *       "default" = "Drupal\entity\Menu\DefaultEntityLocalTaskProvider",
+ *     },
+ *     "route_provider" = {
+ *       "default" = "Drupal\entity\Routing\AdminHtmlRouteProvider",
+ *     },
  *   },
  *   base_table = "commerce_invoice",
  *   admin_permission = "administer commerce_invoice",
@@ -48,6 +56,11 @@ use Drupal\user\UserInterface;
  *     "uuid" = "uuid",
  *     "owner" = "uid",
  *     "bundle" = "type",
+ *   },
+ *   links = {
+ *     "delete-form" = "/admin/commerce/invoices/{commerce_invoice}/delete",
+ *     "generate-form" = "/admin/commerce/invoices/generate",
+ *     "collection" = "/admin/commerce/invoices",
  *   },
  *   bundle_entity_type = "commerce_invoice_type",
  *   field_ui_base_route = "entity.commerce_invoice_type.edit_form"
@@ -436,16 +449,30 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
   /**
    * {@inheritdoc}
    */
-  public function getDueDate() {
-    // Can't use the ->date property because it resets the timezone to UTC.
-    return new DrupalDateTime($this->get('due_date')->value);
+  public function getInvoiceDateTime() {
+    return $this->get('invoice_date')->value;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setDueDate(DrupalDateTime $start_date) {
-    $this->get('due_date')->value = $start_date->format('Y-m-d');
+  public function setInvoiceDateTime($timestamp) {
+    $this->set('invoice_date', $timestamp);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDueDateTime() {
+    return $this->get('due_date')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setDueDateTime($timestamp) {
+    $this->set('due_date', $timestamp);
     return $this;
   }
 
@@ -465,6 +492,10 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
     if ($billing_profile && $billing_profile->getOwnerId()) {
       $billing_profile->setOwnerId(0);
       $billing_profile->save();
+    }
+
+    if (empty($this->getInvoiceDateTime())) {
+      $this->setInvoiceDateTime(\Drupal::time()->getRequestTime());
     }
 
     if ($this->getState()->getId() == 'pending') {
@@ -586,31 +617,15 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
       ->setLabel(t('Changed'))
       ->setDescription(t('The time when the invoice was last edited.'));
 
-    $fields['due_date'] = BaseFieldDefinition::create('datetime')
+    $fields['invoice_date'] = BaseFieldDefinition::create('timestamp')
+      ->setLabel(t('Date'))
+      ->setDescription(t('The invoice date'));
+
+    $fields['due_date'] = BaseFieldDefinition::create('timestamp')
       ->setLabel(t('Due date'))
-      ->setDescription(t('The date the invoice is due.'))
-      ->setRequired(TRUE)
-      ->setSetting('datetime_type', 'date')
-      ->setDefaultValueCallback('Drupal\commerce_invoice\Entity\Invoice::getDefaultDueDate')
-      ->setDisplayOptions('form', [
-        'type' => 'datetime_default',
-        'weight' => 5,
-      ]);
+      ->setDescription(t('The date the invoice is due.'));
 
     return $fields;
-  }
-
-  /**
-   * Default value callback for 'due_date' base field definition.
-   *
-   * @see ::baseFieldDefinitions()
-   *
-   * @return string
-   *   The default value (date string).
-   */
-  public static function getDefaultDueDate() {
-    $timestamp = \Drupal::time()->getRequestTime();
-    return gmdate('Y-m-d', $timestamp);
   }
 
   /**

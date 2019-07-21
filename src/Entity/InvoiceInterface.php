@@ -323,21 +323,39 @@ interface InvoiceInterface extends ContentEntityInterface, EntityAdjustableInter
   public function setCreatedTime($timestamp);
 
   /**
-   * Gets the invoice due date.
+   * Gets the invoice date timestamp.
    *
-   * @return \Drupal\Core\Datetime\DrupalDateTime
-   *   The invoice due date.
+   * @return int
+   *   Date timestamp of the invoice.
    */
-  public function getDueDate();
+  public function getInvoiceDateTime();
 
   /**
-   * Sets the invoice due date.
+   * Sets the invoice date timestamp.
    *
-   * @param \Drupal\Core\Datetime\DrupalDateTime $due_date
-   *   The invoice due date.
+   * @param int $timestamp
+   *   The invoice date timestamp.
    *
    * @return $this
    */
-  public function setDueDate(DrupalDateTime $due_date);
+  public function setInvoiceDateTime($timestamp);
+
+  /**
+   * Gets the invoice due date timestamp.
+   *
+   * @return int
+   *   Due date timestamp of the invoice.
+   */
+  public function getDueDateTime();
+
+  /**
+   * Sets the invoice due date timestamp.
+   *
+   * @param int $timestamp
+   *   The invoice due date timestamp.
+   *
+   * @return $this
+   */
+  public function setDueDateTime($timestamp);
 
 }

@@ -5,3 +5,11 @@ commerce_invoice.configuration:
     _title: 'Invoices'
   requirements:
     _permission: 'access commerce administration pages'
+
+entity.commerce_invoice.generate_page:
+  path: '/admin/commerce/invoices/generate'
+  defaults:
+    _form: '\Drupal\commerce_invoice\Form\InvoiceGenerateForm'
+    _title: 'Generate a new invoice'
+  requirements:
+    _entity_create_any_access: 'commerce_invoice'

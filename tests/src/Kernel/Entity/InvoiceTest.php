@@ -77,8 +77,10 @@ class InvoiceTest extends InvoiceKernelTestBase {
    * @covers ::setCreatedTime
    * @covers ::getChangedTime
    * @covers ::setChangedTime
-   * @covers ::getDueDate
-   * @covers ::setDueDate
+   * @covers ::getInvoiceDateTime
+   * @covers ::setInvoiceDateTime
+   * @covers ::getDueDateTime
+   * @covers ::setDueDateTime
    */
   public function testInvoice() {
     /** @var \Drupal\profile\Entity\ProfileInterface $profile */
@@ -228,8 +230,11 @@ class InvoiceTest extends InvoiceKernelTestBase {
     $invoice->setChangedTime(635879800);
     $this->assertEquals(635879800, $invoice->getChangedTime());
 
-    $invoice->setDueDate(new DrupalDateTime('2017-01-01'));
-    $this->assertEquals('2017-01-01', $invoice->getDueDate()->format('Y-m-d'));
+    $invoice->setInvoiceDateTime(635879900);
+    $this->assertEquals(635879900, $invoice->getInvoiceDateTime());
+
+    $invoice->setDueDateTime(635879950);
+    $this->assertEquals(635879950, $invoice->getDueDateTime());
   }
 
   /**

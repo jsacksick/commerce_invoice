@@ -1,3 +1,9 @@
+entity.commerce_invoice.generate_page:
+  route_name: entity.commerce_invoice.generate_page
+  title: 'Generate a new invoice'
+  appears_on:
+    - entity.commerce_invoice.collection
+
 entity.commerce_invoice_type.add_form:
   route_name: entity.commerce_invoice_type.add_form
   title: 'Add invoice type'
