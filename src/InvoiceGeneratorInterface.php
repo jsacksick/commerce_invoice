@@ -19,8 +19,8 @@ interface InvoiceGeneratorInterface {
    *   (optional) An array of values to set on the invoice,
    *   keyed by property name.
    *
-   * @return \Drupal\commerce_invoice\Entity\InvoiceInterface
-   *   The generated invoice.
+   * @return \Drupal\commerce_invoice\Entity\InvoiceInterface|null
+   *   The generated invoice, NULL if it could not be generated.
    */
   public function generate(array $orders, ProfileInterface $profile, array $values = []);
 

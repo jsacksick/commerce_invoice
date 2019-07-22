@@ -4,10 +4,19 @@ namespace Drupal\commerce_invoice;
 
 use Drupal\commerce_order\Entity\OrderItemType;
 use Drupal\commerce_order\Entity\OrderType;
+use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\profile\Entity\ProfileInterface;
+use Psr\Log\LoggerInterface;
 
 class InvoiceGenerator implements InvoiceGeneratorInterface {
+
+  /**
+   * The database connection to use.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $connection;
 
   /**
    * The entity type manager.
@@ -19,10 +28,13 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
   /**
    * Constructs a new InvoiceGenerator object.
    *
+   * @param \Drupal\Core\Database\Connection $connection
+   *   The database connection to use.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(Connection $connection, EntityTypeManagerInterface $entity_type_manager, LoggerInterface $logger) {
+    $this->connection = $connection;
     $this->entityTypeManager = $entity_type_manager;
   }
 
@@ -30,6 +42,18 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
    * {@inheritdoc}
    */
   public function generate(array $orders, ProfileInterface $profile, array $values = []) {
+    $transaction = $this->connection->startTransaction();
+    try {
+      return $this->doGenerate($orders, $profile, $values);
+    }
+    catch (\Exception $exception) {
+      $transaction->rollBack();
+      watchdog_exception('commerce_invoice', $exception);
+      return NULL;
+    }
+  }
+
+  protected function doGenerate(array $orders, ProfileInterface $profile, array $values = []) {
     $invoice_storage = $this->entityTypeManager->getStorage('commerce_invoice');
     $invoice_item_storage = $this->entityTypeManager->getStorage('commerce_invoice_item');
     // Assume the order type from the first passed order, we'll use it

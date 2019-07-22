@@ -1,7 +1,7 @@
 services:
   commerce_invoice.invoice_generator:
     class: Drupal\commerce_invoice\InvoiceGenerator
-    arguments: ['@entity_type.manager']
+    arguments: ['@database', '@entity_type.manager']
 
   commerce_invoice.invoice_number_generator:
     class: Drupal\commerce_invoice\InvoiceNumberGenerator
@@ -15,6 +15,11 @@ services:
     class: Drupal\commerce_invoice\EventSubscriber\EntityPrintSubscriber
     tags:
       - { name: event_subscriber }
+
+  logger.channel.commerce_invoice:
+    class: Drupal\Core\Logger\LoggerChannel
+    factory: logger.factory:get
+    arguments: ['commerce_invoice']
 
   plugin.manager.commerce_number_generator:
     class: Drupal\commerce_invoice\NumberGeneratorManager

@@ -104,7 +104,13 @@ class InvoiceGenerateForm extends FormBase {
       'store_id' => $values['store_id'],
       'uid' => $values['uid'],
     ];
-    $this->invoiceGenerator->generate($orders, $first_order->getBillingProfile(), $invoice_values);
+    $invoice = $this->invoiceGenerator->generate($orders, $first_order->getBillingProfile(), $invoice_values);
+    if ($invoice) {
+      $this->messenger()->addMessage($this->t('The invoice %label has been successfully saved.', ['%label' => $invoice->label()]));
+    }
+    else {
+      $this->messenger()->addError($this->t('There was an error while generating the invoice.'));
+    }
     $form_state->setRedirect('entity.commerce_invoice.collection');
   }
 
