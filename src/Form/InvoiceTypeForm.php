@@ -5,6 +5,7 @@ namespace Drupal\commerce_invoice\Form;
 use Drupal\commerce\EntityTraitManagerInterface;
 use Drupal\commerce\Form\CommerceBundleEntityFormBase;
 use Drupal\commerce_invoice\NumberGeneratorManager;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -85,7 +86,11 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
     // The form state will have a plugin value if #ajax was used.
     $number_generator = $form_state->getValue('numberGenerator', $invoice_type->getNumberGeneratorId());
 
+    $wrapper_id = Html::getUniqueId('invoice-type-form');
     $form['#tree'] = TRUE;
+    $form['#prefix'] = '<div id="' . $wrapper_id . '">';
+    $form['#suffix'] = '</div>';
+
     $form['label'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Label'),
@@ -146,6 +151,10 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
       '#options' => $number_generators,
       '#default_value' => $number_generator,
       '#required' => TRUE,
+      '#ajax' => [
+        'callback' => '::ajaxRefresh',
+        'wrapper' => $wrapper_id,
+      ],
     ];
     $form['workflow'] = [
       '#type' => 'select',
@@ -156,6 +165,13 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
     ];
     $form = $this->buildTraitForm($form, $form_state);
 
+    return $form;
+  }
+
+  /**
+   * Ajax callback.
+   */
+  public static function ajaxRefresh(array $form, FormStateInterface $form_state) {
     return $form;
   }
 

@@ -33,7 +33,7 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    */
-  public function __construct(Connection $connection, EntityTypeManagerInterface $entity_type_manager, LoggerInterface $logger) {
+  public function __construct(Connection $connection, EntityTypeManagerInterface $entity_type_manager) {
     $this->connection = $connection;
     $this->entityTypeManager = $entity_type_manager;
   }

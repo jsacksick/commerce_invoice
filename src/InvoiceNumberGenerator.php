@@ -4,6 +4,7 @@ namespace Drupal\commerce_invoice;
 
 use Drupal\commerce_invoice\Entity\InvoiceInterface;
 use Drupal\commerce_invoice\Entity\InvoiceType;
+use Drupal\commerce_invoice\Plugin\Commerce\NumberGenerator\NumberGeneratorInterface;
 use Drupal\commerce_store\Entity\StoreInterface;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Database\Connection;
@@ -59,19 +60,7 @@ class InvoiceNumberGenerator implements InvoiceNumberGeneratorInterface {
     $store = $invoice->getStore();
     /** @var \Drupal\commerce_invoice\Plugin\Commerce\NumberGenerator\NumberGeneratorInterface $number_generator */
     $number_generator = $invoice_type->getNumberGenerator();
-    $plugin_id = $number_generator->getPluginId();
-    $lock_name = "commerce_invoice.number_generator.{$store->id()}.{$plugin_id}";
-    while (!$this->lock->acquire($lock_name)) {
-      $this->lock->wait($lock_name);
-    }
-    $last_sequence = $this->getLastSequence($store, $plugin_id);
-    // Check if the current sequence should be reset.
-    // @todo: Expand comments.
-    if ($last_sequence && $number_generator->shouldReset($last_sequence)) {
-      $last_sequence = NULL;
-    }
-    $next_sequence = $this->getNextSequence($store, $plugin_id, $last_sequence);
-    $this->lock->release($lock_name);
+    $next_sequence = $this->getNextSequence($store, $number_generator);
     return $number_generator->generate($invoice, $next_sequence);
   }
 
@@ -80,8 +69,8 @@ class InvoiceNumberGenerator implements InvoiceNumberGeneratorInterface {
    *
    * @param \Drupal\commerce_store\Entity\StoreInterface $store
    *   The store.
-   * @param $plugin_id
-   *   The number generator plugin ID.
+   * @param \Drupal\commerce_invoice\Plugin\Commerce\NumberGenerator\NumberGeneratorInterface $number_generator
+   *   The number generator plugin.
    * @param \Drupal\commerce_invoice\InvoiceNumberSequence|null $current_sequence
    *   The current invoice number sequence, or NULL if the sequence hasn't
    *   started yet.
@@ -89,10 +78,17 @@ class InvoiceNumberGenerator implements InvoiceNumberGeneratorInterface {
    * @return \Drupal\commerce_invoice\InvoiceNumberSequence
    *   The next invoice number sequence.
    */
-  protected function getNextSequence(StoreInterface $store, $plugin_id, InvoiceNumberSequence $current_sequence = NULL) {
+  protected function getNextSequence(StoreInterface $store, NumberGeneratorInterface $number_generator) {
+    $plugin_id = $number_generator->getPluginId();
+    $lock_name = "commerce_invoice.number_generator.{$store->id()}.{$plugin_id}";
+    while (!$this->lock->acquire($lock_name)) {
+      $this->lock->wait($lock_name);
+    }
     $next_sequence = 1;
-    if ($current_sequence) {
-      $next_sequence = $current_sequence->getSequence() + 1;
+    $last_sequence = $this->getLastSequence($store, $number_generator);
+    // Check if the current sequence should be reset.
+    if ($last_sequence && !$number_generator->shouldReset($last_sequence)) {
+      $next_sequence = $last_sequence->getSequence() + 1;
     }
     $generated = $this->time->getCurrentTime();
     $this->connection->merge('commerce_invoice_number_sequence')
@@ -107,7 +103,7 @@ class InvoiceNumberGenerator implements InvoiceNumberGeneratorInterface {
         'plugin_id' => $plugin_id
       ])
       ->execute();
-
+    $this->lock->release($lock_name);
     return new InvoiceNumberSequence([
       'store_id' => $store->id(),
       'plugin_id' => $plugin_id,
@@ -121,19 +117,19 @@ class InvoiceNumberGenerator implements InvoiceNumberGeneratorInterface {
    *
    * @param \Drupal\commerce_store\Entity\StoreInterface $store
    *   The store.
-   * @param $plugin_id
-   *   The number generator plugin ID.
+   * @param \Drupal\commerce_invoice\Plugin\Commerce\NumberGenerator\NumberGeneratorInterface $number_generator
+   *   The number generator plugin.
    *
    * @return \Drupal\commerce_invoice\InvoiceNumberSequence|null
    *   The current invoice number sequence, or NULL if the sequence hasn't
    *   started yet.
    */
-  protected function getLastSequence(StoreInterface $store, $plugin_id) {
+  protected function getLastSequence(StoreInterface $store, NumberGeneratorInterface $number_generator) {
     $query = $this->connection->select('commerce_invoice_number_sequence', 'cin');
     $query->fields('cin', ['sequence', 'generated']);
     $query
       ->condition('store_id', $store->id())
-      ->condition('plugin_id', $plugin_id);
+      ->condition('plugin_id', $number_generator->getPluginId());
     $sequence = $query->execute()->fetchAssoc();
 
     if (!$sequence) {
@@ -142,7 +138,7 @@ class InvoiceNumberGenerator implements InvoiceNumberGeneratorInterface {
 
     return new InvoiceNumberSequence([
       'store_id' => $store->id(),
-      'plugin_id' => $plugin_id,
+      'plugin_id' => $number_generator->getPluginId(),
       'sequence' => $sequence['sequence'],
       'generated' => $sequence['generated'],
     ]);
