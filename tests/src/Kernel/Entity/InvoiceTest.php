@@ -119,6 +119,7 @@ class InvoiceTest extends InvoiceKernelTestBase {
     /** @var \Drupal\commerce_invoice\Entity\InvoiceInterface $invoice */
     $invoice = Invoice::create([
       'type' => 'default',
+      'store_id' => $this->store->id(),
     ]);
     $invoice->save();
 
@@ -245,6 +246,7 @@ class InvoiceTest extends InvoiceKernelTestBase {
   public function testTotalCalculation() {
     $invoice = Invoice::create([
       'type' => 'default',
+      'store_id' => $this->store->id(),
     ]);
     $invoice->save();
 

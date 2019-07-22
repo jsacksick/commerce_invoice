@@ -637,8 +637,7 @@ display:
               anonymous: '0'
               administrator: '0'
               trade: '0'
-            reduce: 0
-            placeholder: ''
+            reduce: false
           is_grouped: false
           group_info:
             label: ''
@@ -653,7 +652,7 @@ display:
             group_items: {  }
           entity_type: commerce_invoice
           entity_field: state
-          plugin_id: string
+          plugin_id: state_machine_state
         invoice_number:
           id: invoice_number
           table: commerce_invoice
@@ -728,6 +727,10 @@ display:
       relationships: {  }
       arguments: {  }
       display_extenders: {  }
+      filter_groups:
+        operator: AND
+        groups:
+          1: AND
     cache_metadata:
       max-age: -1
       contexts:
