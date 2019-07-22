@@ -483,10 +483,16 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
   public function preSave(EntityStorageInterface $storage) {
     parent::preSave($storage);
 
-    foreach (['store_id', 'total_price', 'billing_profile', 'invoice_items'] as $field) {
+    foreach (['store_id'] as $field) {
       if ($this->get($field)->isEmpty()) {
         throw new EntityMalformedException(sprintf('Required invoice field "%s" is empty.', $field));
       }
+    }
+
+    if (empty($this->getInvoiceNumber())) {
+      /** @var \Drupal\commerce_invoice\InvoiceNumberGeneratorInterface $invoice_number_generator */
+      $invoice_number_generator = \Drupal::service('commerce_invoice.invoice_number_generator');
+      $this->setInvoiceNumber($invoice_number_generator->generateInvoiceNumber($this));
     }
 
     $customer = $this->getCustomer();

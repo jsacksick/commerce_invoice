@@ -1,0 +1,47 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function commerce_invoice_schema() {
+  $schema['commerce_invoice_number_sequence'] = [
+    'description' => 'Stores sequential numbers for invoices.',
+    'fields' => [
+      'store_id' => [
+        'description' => 'The store ID.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'plugin_id' => [
+        'description' => 'The invoice number generator plugin ID.',
+        'length' => 128,
+        'type' => 'varchar_ascii',
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'sequence' => [
+        'description' => 'The current sequential number for the given store/plugin combination.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'generated' => [
+        'description' => 'The Unix timestamp when the sequential number was generated.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+    ],
+    'primary key' => ['store_id', 'plugin_id'],
+    'indexes' => [
+      'store_id' => ['store_id'],
+    ],
+    'foreign keys' => [
+      'store_id' => ['commerce_store' => 'store_id'],
+    ],
+  ];
+
+  return $schema;
+}

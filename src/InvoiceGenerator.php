@@ -64,12 +64,9 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
       }
       $total_paid = $total_paid ? $total_paid->add($order->getTotalPaid()) : $order->getTotalPaid();
     }
-    // @todo: Remove this once we have a mechanism for generating invoice
-    // numbers.
-    if (empty($invoice->getInvoiceNumber())) {
-      $invoice->setInvoiceNumber(mt_rand(1, 100));
+    if ($total_paid) {
+      $invoice->setTotalPaid($total_paid);
     }
-    $invoice->setTotalPaid($total_paid);
     $invoice->save();
     return $invoice;
   }

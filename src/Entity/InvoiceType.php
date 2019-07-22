@@ -2,6 +2,7 @@
 
 namespace Drupal\commerce_invoice\Entity;
 
+use Drupal\commerce\CommerceSinglePluginCollection;
 use Drupal\commerce\Entity\CommerceBundleEntityBase;
 
 /**
@@ -46,6 +47,7 @@ use Drupal\commerce\Entity\CommerceBundleEntityBase;
  *     "id",
  *     "footerText",
  *     "paymentTerms",
+ *     "numberGenerator",
  *     "workflow",
  *     "traits",
  *   },
@@ -73,6 +75,28 @@ class InvoiceType extends CommerceBundleEntityBase implements InvoiceTypeInterfa
    * @var string
    */
   protected $paymentTerms;
+
+  /**
+   * The number generator plugin ID.
+   *
+   * @var string
+   */
+  protected $numberGenerator = 'infinite';
+
+  /**
+   * The number generator plugin configuration.
+   *
+   * @var array
+   */
+  protected $numberGeneratorConfiguration = [];
+
+
+  /**
+   * The plugin collection that holds the number generator plugin.
+   *
+   * @var \Drupal\commerce\CommerceSinglePluginCollection
+   */
+  protected $numberGeneratorPluginCollection;
 
   /**
    * The invoice type workflow ID.
@@ -114,6 +138,28 @@ class InvoiceType extends CommerceBundleEntityBase implements InvoiceTypeInterfa
   /**
    * {@inheritdoc}
    */
+  public function getNumberGeneratorId() {
+    return $this->numberGenerator;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setNumberGeneratorId($number_generator_id) {
+    $this->numberGenerator = $number_generator_id;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getNumberGenerator() {
+    return $this->getNumberGeneratorPluginCollection()->get($this->numberGenerator);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getWorkflowId() {
     return $this->workflow;
   }
@@ -138,6 +184,22 @@ class InvoiceType extends CommerceBundleEntityBase implements InvoiceTypeInterfa
     $this->calculatePluginDependencies($workflow);
 
     return $this;
+  }
+
+  /**
+   * Gets the plugin collection that holds the number generator plugin.
+   *
+   * Ensures the plugin collection is initialized before returning it.
+   *
+   * @return \Drupal\commerce\CommerceSinglePluginCollection
+   *   The plugin collection.
+   */
+  protected function getNumberGeneratorPluginCollection() {
+    if (!$this->numberGeneratorPluginCollection) {
+      $plugin_manager = \Drupal::service('plugin.manager.commerce_number_generator');
+      $this->numberGeneratorPluginCollection = new CommerceSinglePluginCollection($plugin_manager, $this->numberGenerator, $this->numberGeneratorConfiguration, $this->id);
+    }
+    return $this->numberGeneratorPluginCollection;
   }
 
 }

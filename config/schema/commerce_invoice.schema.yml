@@ -8,6 +8,9 @@ commerce_invoice.commerce_invoice_type.*:
     paymentTerms:
       type: text
       label: 'Payment terms'
+    numberGenerator:
+      type: string
+      label: 'Number generator'
     workflow:
       type: string
       label: 'Workflow'
@@ -19,3 +22,6 @@ commerce_order.commerce_order_type.*.third_party.commerce_invoice:
     invoice_type:
       type: string
       label: 'Invoice type'
+
+commerce_invoice.commerce_number_generator.plugin.*:
+  type: mapping
