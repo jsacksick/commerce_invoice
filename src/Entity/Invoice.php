@@ -8,6 +8,7 @@ use Drupal\commerce_price\Price;
 use Drupal\commerce_store\Entity\StoreInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityChangedTrait;
+use Drupal\Core\Entity\EntityMalformedException;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -481,6 +482,12 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
    */
   public function preSave(EntityStorageInterface $storage) {
     parent::preSave($storage);
+
+    foreach (['store_id', 'total_price', 'billing_profile', 'invoice_items'] as $field) {
+      if ($this->get($field)->isEmpty()) {
+        throw new EntityMalformedException(sprintf('Required invoice field "%s" is empty.', $field));
+      }
+    }
 
     $customer = $this->getCustomer();
     // The customer has been deleted, clear the reference.
