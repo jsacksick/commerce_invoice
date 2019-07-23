@@ -10,7 +10,7 @@ use Drupal\Core\Datetime\DrupalDateTime;
  *
  * @CommerceNumberGenerator(
  *   id = "yearly",
- *   label = @Translation("Yearly"),
+ *   label = @Translation("Yearly (Reset every year, with an id incremented at each invoice generation)"),
  * )
  */
 class Yearly extends NumberGeneratorBase {

@@ -153,7 +153,7 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
     }
     $form['numberGenerator'] = [
       '#type' => 'radios',
-      '#title' => $this->t('Number generator'),
+      '#title' => $this->t('Invoice number generation method'),
       '#options' => $number_generators,
       '#default_value' => $number_generator,
       '#required' => TRUE,

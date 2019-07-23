@@ -5,5 +5,9 @@ label: Default
 id: default
 footerText: ''
 paymentTerms: ''
+numberGenerator: infinite
+numberGeneratorConfiguration:
+  pattern: '{id}'
+  padding: 0
 workflow: invoice_default
 traits: {  }
