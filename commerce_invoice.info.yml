@@ -11,4 +11,5 @@ dependencies:
   - entity:entity
   - entity_print:entity_print
   - profile:profile
+  - token:token
   - state_machine:state_machine

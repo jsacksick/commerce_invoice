@@ -19,13 +19,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 abstract class NumberGeneratorBase extends PluginBase implements NumberGeneratorInterface, ContainerFactoryPluginInterface {
 
   /**
-   * The module handler.
-   *
-   * @var \Drupal\Core\Extension\ModuleHandlerInterface
-   */
-  protected $moduleHandler;
-
-  /**
    * The time.
    *
    * @var \Drupal\Component\Datetime\TimeInterface
@@ -48,17 +41,14 @@ abstract class NumberGeneratorBase extends PluginBase implements NumberGenerator
    *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
-   *   The module handler.
    * @param \Drupal\Component\Datetime\TimeInterface $time
    *   The time.
    * @param \Drupal\Core\Utility\Token $token
    *   The token service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, ModuleHandlerInterface $module_handler, TimeInterface $time, Token $token) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, TimeInterface $time, Token $token) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->setConfiguration($configuration);
-    $this->moduleHandler = $module_handler;
     $this->time = $time;
     $this->token = $token;
   }
@@ -71,7 +61,6 @@ abstract class NumberGeneratorBase extends PluginBase implements NumberGenerator
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('module_handler'),
       $container->get('datetime.time'),
       $container->get('token')
     );
@@ -110,24 +99,20 @@ abstract class NumberGeneratorBase extends PluginBase implements NumberGenerator
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+    $token_types = ['commerce_invoice'];
     $form['pattern'] = [
       '#title' => $this->t('Pattern'),
       '#type' => 'textfield',
       '#description' => $this->t('In addition to the generation method, a pattern for the invoice number can be set, e.g. to pre- or suffix the calculated number. The placeholder "{id}" is replaced with the generated number and *must* be included in the pattern. Tokens can be used.'),
       '#default_value' => $this->configuration['pattern'],
       '#required' => TRUE,
+      '#element_validate' => ['token_element_validate'],
+      '#token_types' => $token_types,
     ];
-    if ($this->moduleHandler->moduleExists('token')) {
-      $token_types = ['commerce_invoice'];
-      $form['pattern'] += [
-        '#element_validate' => ['token_element_validate'],
-        '#token_types' => $token_types,
-      ];
-      $form['pattern_help'] = [
-        '#theme' => 'token_tree_link',
-        '#token_types' => $token_types,
-      ];
-    }
+    $form['pattern_help'] = [
+      '#theme' => 'token_tree_link',
+      '#token_types' => $token_types,
+    ];
     $form['padding'] = [
       '#type' => 'number',
       '#title' => $this->t('Invoice ID padding'),

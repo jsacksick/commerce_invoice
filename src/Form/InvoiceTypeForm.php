@@ -22,13 +22,6 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
   use EntityDuplicateFormTrait;
 
   /**
-   * The module handler.
-   *
-   * @var \Drupal\Core\Extension\ModuleHandlerInterface
-   */
-  protected $moduleHandler;
-
-  /**
    * The number generator plugin manager.
    *
    * @var \Drupal\commerce_invoice\NumberGeneratorManager
@@ -47,16 +40,13 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
    *
    * @param \Drupal\commerce\EntityTraitManagerInterface $trait_manager
    *   The entity trait manager.
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
-   *   The module handler.
    * @param \Drupal\commerce_invoice\NumberGeneratorManager $number_generator_manager
    *   The number generator plugin manager.
    * @param \Drupal\state_machine\WorkflowManagerInterface $workflow_manager
    *   The workflow manager.
    */
-  public function __construct(EntityTraitManagerInterface $trait_manager, ModuleHandlerInterface $module_handler, NumberGeneratorManager $number_generator_manager, WorkflowManagerInterface $workflow_manager) {
+  public function __construct(EntityTraitManagerInterface $trait_manager, NumberGeneratorManager $number_generator_manager, WorkflowManagerInterface $workflow_manager) {
     parent::__construct($trait_manager);
-    $this->moduleHandler = $module_handler;
     $this->numberGeneratorPluginManager = $number_generator_manager;
     $this->workflowManager = $workflow_manager;
   }
@@ -67,7 +57,6 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('plugin.manager.commerce_entity_trait'),
-      $container->get('module_handler'),
       $container->get('plugin.manager.commerce_number_generator'),
       $container->get('plugin.manager.workflow')
     );
@@ -117,40 +106,30 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
       '#disabled' => !$invoice_type->isNew(),
     ];
     $token_types = ['commerce_invoice'];
-    $token_exists = $this->moduleHandler->moduleExists('token');
     $form['footerText'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Footer text'),
       '#default_value' => $invoice_type->getFooterText(),
       '#description' => $this->t('Text to display in the footer of the invoice.'),
+      '#element_validate' => ['token_element_validate'],
+      '#token_types' => $token_types,
     ];
-    // Allow inserting tokens if the token module exists.
-    if ($token_exists) {
-      $form['footerText'] += [
-        '#element_validate' => ['token_element_validate'],
-        '#token_types' => $token_types,
-      ];
-      $form['footer_text_token_help'] = [
-        '#theme' => 'token_tree_link',
-        '#token_types' => $token_types,
-      ];
-    }
+    $form['footer_text_token_help'] = [
+      '#theme' => 'token_tree_link',
+      '#token_types' => $token_types,
+    ];
     $form['paymentTerms'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Payment terms'),
       '#default_value' => $invoice_type->getPaymentTerms(),
       '#description' => $this->t('The payment terms.'),
+      '#element_validate' => ['token_element_validate'],
+      '#token_types' => $token_types,
     ];
-    if ($token_exists) {
-      $form['paymentTerms'] += [
-        '#element_validate' => ['token_element_validate'],
-        '#token_types' => $token_types,
-      ];
-      $form['payment_terms_token_help'] = [
-        '#theme' => 'token_tree_link',
-        '#token_types' => $token_types,
-      ];
-    }
+    $form['payment_terms_token_help'] = [
+      '#theme' => 'token_tree_link',
+      '#token_types' => $token_types,
+    ];
     $form['numberGenerator'] = [
       '#type' => 'radios',
       '#title' => $this->t('Invoice number generation method'),
