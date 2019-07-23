@@ -65,20 +65,9 @@ class InvoiceNumberGenerator implements InvoiceNumberGeneratorInterface {
   }
 
   /**
-   * Gets the next invoice number sequence.
-   *
-   * @param \Drupal\commerce_store\Entity\StoreInterface $store
-   *   The store.
-   * @param \Drupal\commerce_invoice\Plugin\Commerce\NumberGenerator\NumberGeneratorInterface $number_generator
-   *   The number generator plugin.
-   * @param \Drupal\commerce_invoice\InvoiceNumberSequence|null $current_sequence
-   *   The current invoice number sequence, or NULL if the sequence hasn't
-   *   started yet.
-   *
-   * @return \Drupal\commerce_invoice\InvoiceNumberSequence
-   *   The next invoice number sequence.
+   * {@inheritdoc}
    */
-  protected function getNextSequence(StoreInterface $store, NumberGeneratorInterface $number_generator) {
+  public function getNextSequence(StoreInterface $store, NumberGeneratorInterface $number_generator, $update = TRUE) {
     $plugin_id = $number_generator->getPluginId();
     $lock_name = "commerce_invoice.number_generator.{$store->id()}.{$plugin_id}";
     while (!$this->lock->acquire($lock_name)) {
@@ -91,18 +80,20 @@ class InvoiceNumberGenerator implements InvoiceNumberGeneratorInterface {
       $next_sequence = $last_sequence->getSequence() + 1;
     }
     $generated = $this->time->getCurrentTime();
-    $this->connection->merge('commerce_invoice_number_sequence')
-      ->fields([
-        'store_id' => $store->id(),
-        'plugin_id' => $plugin_id,
-        'sequence' => $next_sequence,
-        'generated' => $generated,
-      ])
-      ->keys([
-        'store_id' => $store->id(),
-        'plugin_id' => $plugin_id
-      ])
-      ->execute();
+    if ($update) {
+      $this->connection->merge('commerce_invoice_number_sequence')
+        ->fields([
+          'store_id' => $store->id(),
+          'plugin_id' => $plugin_id,
+          'sequence' => $next_sequence,
+          'generated' => $generated,
+        ])
+        ->keys([
+          'store_id' => $store->id(),
+          'plugin_id' => $plugin_id
+        ])
+        ->execute();
+    }
     $this->lock->release($lock_name);
     return new InvoiceNumberSequence([
       'store_id' => $store->id(),
