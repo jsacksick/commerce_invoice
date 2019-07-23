@@ -48,6 +48,7 @@ use Drupal\commerce\Entity\CommerceBundleEntityBase;
  *     "footerText",
  *     "paymentTerms",
  *     "numberGenerator",
+ *     "numberGeneratorConfiguration",
  *     "workflow",
  *     "traits",
  *   },
@@ -89,7 +90,6 @@ class InvoiceType extends CommerceBundleEntityBase implements InvoiceTypeInterfa
    * @var array
    */
   protected $numberGeneratorConfiguration = [];
-
 
   /**
    * The plugin collection that holds the number generator plugin.
@@ -147,6 +147,8 @@ class InvoiceType extends CommerceBundleEntityBase implements InvoiceTypeInterfa
    */
   public function setNumberGeneratorId($number_generator_id) {
     $this->numberGenerator = $number_generator_id;
+    $this->numberGeneratorConfiguration = [];
+    $this->numberGeneratorPluginCollection = NULL;
     return $this;
   }
 
@@ -155,6 +157,22 @@ class InvoiceType extends CommerceBundleEntityBase implements InvoiceTypeInterfa
    */
   public function getNumberGenerator() {
     return $this->getNumberGeneratorPluginCollection()->get($this->numberGenerator);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getNumberGeneratorConfiguration() {
+    return $this->numberGeneratorConfiguration;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setNumberGeneratorConfiguration(array $configuration) {
+    $this->numberGeneratorConfiguration = $configuration;
+    $this->numberGeneratorPluginCollection = NULL;
+    return $this;
   }
 
   /**
@@ -184,6 +202,22 @@ class InvoiceType extends CommerceBundleEntityBase implements InvoiceTypeInterfa
     $this->calculatePluginDependencies($workflow);
 
     return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function set($property_name, $value) {
+    // Invoke the setters to clear related properties.
+    if ($property_name == 'numberGenerator') {
+      $this->setNumberGeneratorId($value);
+    }
+    elseif ($property_name == 'numberGeneratorConfiguration') {
+      $this->setNumberGeneratorConfiguration($value);
+    }
+    else {
+      return parent::set($property_name, $value);
+    }
   }
 
   /**

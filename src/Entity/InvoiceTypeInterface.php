@@ -72,6 +72,24 @@ interface InvoiceTypeInterface extends CommerceBundleEntityInterface {
   public function getNumberGenerator();
 
   /**
+   * Gets the number generator plugin configuration.
+   *
+   * @return array
+   *   The number generator plugin configuration.
+   */
+  public function getNumberGeneratorConfiguration();
+
+  /**
+   * Sets the number generator plugin configuration.
+   *
+   * @param array $configuration
+   *   The number generator plugin configuration.
+   *
+   * @return $this
+   */
+  public function setNumberGeneratorConfiguration(array $configuration);
+
+  /**
    * Gets the invoice type's workflow ID.
    *
    * Used by the $invoice->state field.

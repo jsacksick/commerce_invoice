@@ -18,6 +18,15 @@ class Monthly extends NumberGeneratorBase {
   /**
    * {@inheritdoc}
    */
+  public function defaultConfiguration() {
+    return [
+      'pattern' => '[current-date:custom:Y-m]-{id}',
+    ] + parent::defaultConfiguration();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function shouldReset(InvoiceNumberSequence $last_sequence) {
     $current_time = DrupalDateTime::createFromTimestamp($this->time->getCurrentTime());
     $generated_time = DrupalDateTime::createFromTimestamp($last_sequence->getGeneratedTime());

@@ -5,8 +5,12 @@ namespace Drupal\commerce_invoice\Plugin\Commerce\NumberGenerator;
 use Drupal\commerce_invoice\Entity\InvoiceInterface;
 use Drupal\commerce_invoice\InvoiceNumberSequence;
 use Drupal\Component\Datetime\TimeInterface;
-use Drupal\Component\Plugin\PluginBase;
+use Drupal\Core\Plugin\PluginBase;
+use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Utility\Token;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -15,11 +19,25 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 abstract class NumberGeneratorBase extends PluginBase implements NumberGeneratorInterface, ContainerFactoryPluginInterface {
 
   /**
+   * The module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
    * The time.
    *
    * @var \Drupal\Component\Datetime\TimeInterface
    */
   protected $time;
+
+  /**
+   * The token service.
+   *
+   * @var \Drupal\Core\Utility\Token
+   */
+  protected $token;
 
   /**
    * Constructs a new NumberGeneratorBase object.
@@ -30,12 +48,19 @@ abstract class NumberGeneratorBase extends PluginBase implements NumberGenerator
    *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler.
    * @param \Drupal\Component\Datetime\TimeInterface $time
    *   The time.
+   * @param \Drupal\Core\Utility\Token $token
+   *   The token service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, TimeInterface $time) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, ModuleHandlerInterface $module_handler, TimeInterface $time, Token $token) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->setConfiguration($configuration);
+    $this->moduleHandler = $module_handler;
     $this->time = $time;
+    $this->token = $token;
   }
 
   /**
@@ -46,7 +71,9 @@ abstract class NumberGeneratorBase extends PluginBase implements NumberGenerator
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('datetime.time')
+      $container->get('module_handler'),
+      $container->get('datetime.time'),
+      $container->get('token')
     );
   }
 
@@ -61,7 +88,98 @@ abstract class NumberGeneratorBase extends PluginBase implements NumberGenerator
    * {@inheritdoc}
    */
   public function generate(InvoiceInterface $invoice, InvoiceNumberSequence $invoice_number_sequence) {
-    return $invoice_number_sequence->getSequence();
+    $sequence = $invoice_number_sequence->getSequence();
+    if ($this->configuration['padding'] > 0) {
+      $sequence = str_pad($sequence, $this->configuration['padding'], '0', STR_PAD_LEFT);
+    }
+    $sequence = str_replace('{id}', $sequence, $this->configuration['pattern']);
+    return $this->token->replace($sequence, ['commerce_invoice' => $invoice]);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function defaultConfiguration() {
+    return [
+      'pattern' => '{id}',
+      'padding' => 0,
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+    $form['pattern'] = [
+      '#title' => $this->t('Pattern'),
+      '#type' => 'textfield',
+      '#description' => $this->t('In addition to the generation method, a pattern for the invoice number can be set, e.g. to pre- or suffix the calculated number. The placeholder "{id}" is replaced with the generated number and *must* be included in the pattern. Tokens can be used.'),
+      '#default_value' => $this->configuration['pattern'],
+      '#required' => TRUE,
+    ];
+    if ($this->moduleHandler->moduleExists('token')) {
+      $token_types = ['commerce_invoice'];
+      $form['pattern'] += [
+        '#element_validate' => ['token_element_validate'],
+        '#token_types' => $token_types,
+      ];
+      $form['pattern_help'] = [
+        '#theme' => 'token_tree_link',
+        '#token_types' => $token_types,
+      ];
+    }
+    $form['padding'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Invoice ID padding'),
+      '#description' => $this->t('Pad the invoice id with leading zeroes. Example: a value of 6 will output invoice id 52 as 000052.'),
+      '#default_value' => $this->configuration['padding'],
+      '#min' => 0,
+    ];
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
+    $values = $form_state->getValue($form['#parents']);
+    if (strpos($values['pattern'], '{id}') === FALSE) {
+      $form_state->setError($form['pattern'], t('Missing the required placeholder {id}.'));
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
+    if (!$form_state->getErrors()) {
+      $values = $form_state->getValue($form['#parents']);
+
+      $this->configuration = [];
+      $this->configuration['pattern'] = $values['pattern'];
+      $this->configuration['padding'] = $values['padding'];
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getConfiguration() {
+    return $this->configuration;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setConfiguration(array $configuration) {
+    $this->configuration = NestedArray::mergeDeep($this->defaultConfiguration(), $configuration);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies() {
+    return [];
   }
 
 }

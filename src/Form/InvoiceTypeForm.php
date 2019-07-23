@@ -83,9 +83,17 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
     $workflows = $this->workflowManager->getGroupedLabels('commerce_invoice');
     $number_generators = array_column($this->numberGeneratorPluginManager->getDefinitions(), 'label', 'id');
     asort($number_generators);
+
+    // Use the first available number generator as the default value.
+    if (!$invoice_type->getNumberGeneratorId()) {
+      $number_generator_ids = array_keys($number_generators);
+      $number_generator = reset($number_generator_ids);
+      $invoice_type->setNumberGeneratorId($number_generator);
+    }
     // The form state will have a plugin value if #ajax was used.
     $number_generator = $form_state->getValue('numberGenerator', $invoice_type->getNumberGeneratorId());
-
+    // Pass the configuration only if the plugin hasn't been changed via #ajax.
+    $number_generator_configuration = $invoice_type->getNumberGeneratorId() == $number_generator ? $invoice_type->getNumberGeneratorConfiguration() : [];
     $wrapper_id = Html::getUniqueId('invoice-type-form');
     $form['#tree'] = TRUE;
     $form['#prefix'] = '<div id="' . $wrapper_id . '">';
@@ -132,8 +140,6 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
       '#title' => $this->t('Payment terms'),
       '#default_value' => $invoice_type->getPaymentTerms(),
       '#description' => $this->t('The payment terms.'),
-      '#element_validate' => ['token_element_validate'],
-      '#token_types' => $token_types,
     ];
     if ($token_exists) {
       $form['paymentTerms'] += [
@@ -155,6 +161,12 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
         'callback' => '::ajaxRefresh',
         'wrapper' => $wrapper_id,
       ],
+    ];
+    $form['number_generator_configuration'] = [
+      '#type' => 'commerce_plugin_configuration',
+      '#plugin_type' => 'commerce_number_generator',
+      '#plugin_id' => $number_generator,
+      '#default_value' => $number_generator_configuration,
     ];
     $form['workflow'] = [
       '#type' => 'select',
@@ -180,6 +192,18 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     $this->validateTraitForm($form, $form_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitForm(array &$form, FormStateInterface $form_state) {
+    parent::submitForm($form, $form_state);
+
+    $values = $form_state->getValues();
+    /** @var \Drupal\commerce_invoice\Entity\InvoiceTypeInterface $invoice_type */
+    $invoice_type = $this->entity;
+    $invoice_type->setNumberGeneratorConfiguration($values['number_generator_configuration']);
   }
 
   /**

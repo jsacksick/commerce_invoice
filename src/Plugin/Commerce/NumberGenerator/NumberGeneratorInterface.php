@@ -4,12 +4,15 @@ namespace Drupal\commerce_invoice\Plugin\Commerce\NumberGenerator;
 
 use Drupal\commerce_invoice\Entity\InvoiceInterface;
 use Drupal\commerce_invoice\InvoiceNumberSequence;
+use Drupal\Component\Plugin\ConfigurableInterface;
+use Drupal\Component\Plugin\DependentPluginInterface;
 use Drupal\Component\Plugin\PluginInspectionInterface;
+use Drupal\Core\Plugin\PluginFormInterface;
 
 /**
  * Provides an interface for number generator plugins.
  */
-interface NumberGeneratorInterface extends PluginInspectionInterface {
+interface NumberGeneratorInterface extends ConfigurableInterface, DependentPluginInterface, PluginInspectionInterface, PluginFormInterface {
 
   /**
    * Gets whether the invoice number sequence should be reset.

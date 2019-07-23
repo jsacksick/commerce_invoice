@@ -11,6 +11,8 @@ commerce_invoice.commerce_invoice_type.*:
     numberGenerator:
       type: string
       label: 'Number generator'
+    numberGeneratorConfiguration:
+      type: commerce_invoice.commerce_number_generator.plugin.[%parent.numberGenerator]
     workflow:
       type: string
       label: 'Workflow'
@@ -25,3 +27,10 @@ commerce_order.commerce_order_type.*.third_party.commerce_invoice:
 
 commerce_invoice.commerce_number_generator.plugin.*:
   type: mapping
+  mapping:
+    pattern:
+      type: string
+      label: 'Pattern'
+    padding:
+      type: integer
+      label: 'Padding'
