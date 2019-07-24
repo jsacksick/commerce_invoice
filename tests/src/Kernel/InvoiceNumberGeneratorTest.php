@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\commerce_invoice\Kernel;
 
-use Drupal\commerce_invoice\Entity\Invoice;
 use Drupal\commerce_invoice\Entity\InvoiceType;
 
 /**
@@ -11,7 +10,7 @@ use Drupal\commerce_invoice\Entity\InvoiceType;
  * @coversDefaultClass \Drupal\commerce_invoice\InvoiceNumberGenerator
  * @group commerce_invoice
  */
-class InvoiceNumberGenerator extends InvoiceKernelTestBase {
+class InvoiceNumberGeneratorTest extends InvoiceKernelTestBase {
 
   /**
    * The invoice number generator service.
@@ -68,6 +67,10 @@ class InvoiceNumberGenerator extends InvoiceKernelTestBase {
     $this->invoiceNumberGenerator->resetSequence($this->store, $invoice_type);
     $this->assertEquals(2000, $this->invoiceNumberGenerator->generateInvoiceNumber($invoice));
     $this->assertEquals(2001, $this->invoiceNumberGenerator->generateInvoiceNumber($invoice));
+    $configuration['pattern'] = 'INV-{number}';
+    $invoice_type->setNumberGeneratorConfiguration($configuration);
+    $invoice_type->save();
+    $this->assertEquals('INV-2002', $this->invoiceNumberGenerator->generateInvoiceNumber($invoice));
   }
 
   /**
@@ -79,6 +82,10 @@ class InvoiceNumberGenerator extends InvoiceKernelTestBase {
   public function testMonthly() {
     $test_invoice_type = $this->createInvoiceType(NULL, NULL, [
       'numberGenerator' => 'monthly',
+      'numberGeneratorConfiguration' => [
+        'pattern' => '[current-date:custom:Y-m]-{number}',
+        'padding' => 0,
+      ],
     ]);
     $invoice = $this->createInvoice($this->store, $test_invoice_type->id(), [], TRUE);
     $prefix = date('Y-m');
@@ -86,6 +93,11 @@ class InvoiceNumberGenerator extends InvoiceKernelTestBase {
     $this->assertEquals($prefix . '-2', $this->invoiceNumberGenerator->generateInvoiceNumber($invoice));
     $invoice->setStore($this->store2);
     $this->assertEquals($prefix . '-1', $this->invoiceNumberGenerator->generateInvoiceNumber($invoice));
+    $configuration = $test_invoice_type->getNumberGeneratorConfiguration();
+    $configuration['pattern'] = 'INVO-[current-date:custom:Y-m]-{number}';
+    $test_invoice_type->setNumberGeneratorConfiguration($configuration);
+    $test_invoice_type->save();
+    $this->assertEquals("INVO-$prefix-2", $this->invoiceNumberGenerator->generateInvoiceNumber($invoice));
   }
 
   /**
@@ -104,6 +116,12 @@ class InvoiceNumberGenerator extends InvoiceKernelTestBase {
     $this->assertEquals($prefix . '-2', $this->invoiceNumberGenerator->generateInvoiceNumber($invoice));
     $invoice->setStore($this->store2);
     $this->assertEquals($prefix . '-1', $this->invoiceNumberGenerator->generateInvoiceNumber($invoice));
+    $test_invoice_type->setNumberGeneratorConfiguration([
+      'padding' => 3,
+      'pattern' => '[current-date:custom:Y]-{number}',
+    ]);
+    $test_invoice_type->save();
+    $this->assertEquals($prefix . '-002', $this->invoiceNumberGenerator->generateInvoiceNumber($invoice));
   }
 
 }
