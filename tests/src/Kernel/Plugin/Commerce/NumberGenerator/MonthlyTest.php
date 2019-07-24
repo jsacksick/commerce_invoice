@@ -19,19 +19,16 @@ class MonthlyTest extends NumberGeneratorTestBase {
   public function testReset() {
     /** @var \Drupal\commerce_invoice\Plugin\Commerce\NumberGenerator\NumberGeneratorInterface $number_generator */
     $number_generator = $this->numberGeneratorManager->createInstance('monthly');
-    $last_sequence = new InvoiceNumberSequence([
+    $definition = [
       'store_id' => $this->store->id(),
       'generated' => strtotime('today'),
-      'plugin_id' => 'monthly',
+      'invoice_type' => 'default',
       'sequence' => 10,
-    ]);
+    ];
+    $last_sequence = new InvoiceNumberSequence($definition);
     $this->assertFalse($number_generator->shouldReset($last_sequence));
-    $last_sequence = new InvoiceNumberSequence([
-      'store_id' => $this->store->id(),
-      'generated' => strtotime('-35 days'),
-      'plugin_id' => 'monthly',
-      'sequence' => 10,
-    ]);
+    $definition['generated'] = strtotime('-35 days');
+    $last_sequence = new InvoiceNumberSequence($definition);
     $this->assertTrue($number_generator->shouldReset($last_sequence));
   }
 
@@ -44,7 +41,7 @@ class MonthlyTest extends NumberGeneratorTestBase {
     $sequence = new InvoiceNumberSequence([
       'store_id' => $this->store->id(),
       'generated' => strtotime('today'),
-      'plugin_id' => 'monthly',
+      'invoice_type' => 'default',
       'sequence' => 10,
     ]);
     $invoice = Invoice::create([

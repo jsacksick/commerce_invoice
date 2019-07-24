@@ -15,11 +15,11 @@ final class InvoiceNumberSequence {
   protected $storeId;
 
   /**
-   * The invoice number sequence plugin id.
+   * The invoice type.
    *
    * @var string
    */
-  protected $pluginId;
+  protected $invoiceType;
 
   /**
    * The invoice number sequence.
@@ -42,13 +42,13 @@ final class InvoiceNumberSequence {
    *   The definition.
    */
   public function __construct(array $definition) {
-    foreach (['store_id', 'plugin_id', 'sequence', 'generated'] as $required_property) {
+    foreach (['store_id', 'invoice_type', 'sequence', 'generated'] as $required_property) {
       if (empty($definition[$required_property])) {
         throw new \InvalidArgumentException(sprintf('Missing required property %s.', $required_property));
       }
     }
     $this->storeId = $definition['store_id'];
-    $this->pluginId = $definition['plugin_id'];
+    $this->invoiceType = $definition['invoice_type'];
     $this->sequence = $definition['sequence'];
     $this->generated = $definition['generated'];
   }
@@ -64,13 +64,13 @@ final class InvoiceNumberSequence {
   }
 
   /**
-   * Gets the number generator plugin ID.
+   * Gets the invoice type.
    *
    * @return string
-   *   The number generator plugin ID.
+   *   The invoice type.
    */
-  public function getPluginId() {
-    return $this->pluginId;
+  public function getInvoiceType() {
+    return $this->invoiceType;
   }
 
   /**

@@ -488,7 +488,7 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
       }
     }
 
-    if (empty($this->getInvoiceNumber())) {
+    if ($this->isNew() && empty($this->getInvoiceNumber())) {
       /** @var \Drupal\commerce_invoice\InvoiceNumberGeneratorInterface $invoice_number_generator */
       $invoice_number_generator = \Drupal::service('commerce_invoice.invoice_number_generator');
       $this->setInvoiceNumber($invoice_number_generator->generateInvoiceNumber($this));

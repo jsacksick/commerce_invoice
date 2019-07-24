@@ -20,7 +20,7 @@ class Monthly extends NumberGeneratorBase {
    */
   public function defaultConfiguration() {
     return [
-      'pattern' => '[current-date:custom:Y-m]-{id}',
+      'pattern' => '[current-date:custom:Y-m]-{number}',
     ] + parent::defaultConfiguration();
   }
 

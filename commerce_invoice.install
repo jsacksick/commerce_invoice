@@ -13,15 +13,15 @@ function commerce_invoice_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ],
-      'plugin_id' => [
-        'description' => 'The invoice number generator plugin ID.',
+      'invoice_type' => [
+        'description' => 'The invoice type.',
         'length' => 128,
         'type' => 'varchar_ascii',
         'not null' => TRUE,
         'default' => '',
       ],
       'sequence' => [
-        'description' => 'The current sequential number for the given store/plugin combination.',
+        'description' => 'The current sequential number for the given store/invoice_type combination.',
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
@@ -34,7 +34,7 @@ function commerce_invoice_schema() {
         'default' => 0,
       ],
     ],
-    'primary key' => ['store_id', 'plugin_id'],
+    'primary key' => ['store_id', 'invoice_type'],
     'indexes' => [
       'store_id' => ['store_id'],
     ],

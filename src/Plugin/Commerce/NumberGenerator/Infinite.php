@@ -12,6 +12,7 @@ use Drupal\Core\Annotation\Translation;
  *   label = @Translation("Infinite (one single number, that is never reset, and incremented at each invoice generation)"),
  * )
  */
-class Infinite extends NumberGeneratorBase {
+class Infinite extends SupportsInitialNumberOverrideBase {
+
 
 }

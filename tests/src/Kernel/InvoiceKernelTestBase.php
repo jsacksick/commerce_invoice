@@ -3,11 +3,14 @@
 namespace Drupal\Tests\commerce_invoice\Kernel;
 
 use Drupal\Tests\commerce\Kernel\CommerceKernelTestBase;
+use Drupal\Tests\commerce_invoice\Traits\InvoiceTestTrait;
 
 /**
  * Provides a base class for invoice kernel tests.
  */
 abstract class InvoiceKernelTestBase extends CommerceKernelTestBase {
+
+  use InvoiceTestTrait;
 
   /**
    * Modules to enable.

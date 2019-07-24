@@ -34,3 +34,16 @@ commerce_invoice.commerce_number_generator.plugin.*:
     padding:
       type: integer
       label: 'Padding'
+
+commerce_invoice.commerce_number_generator.plugin.infinite:
+  type: mapping
+  mapping:
+    pattern:
+      type: string
+      label: 'Pattern'
+    padding:
+      type: integer
+      label: 'Padding'
+    initialNumber:
+      type: integer
+      label: 'Initial invoice number'

@@ -20,7 +20,7 @@ class Yearly extends NumberGeneratorBase {
    */
   public function defaultConfiguration() {
     return [
-        'pattern' => '[current-date:custom:Y]-{id}',
+        'pattern' => '[current-date:custom:Y]-{number}',
       ] + parent::defaultConfiguration();
   }
 

@@ -22,7 +22,7 @@ class YearlyTest extends NumberGeneratorTestBase {
     $definition = [
       'store_id' => $this->store->id(),
       'generated' => strtotime('today'),
-      'plugin_id' => 'yearly',
+      'invoice_type' => 'default',
       'sequence' => 10,
     ];
     $last_sequence = new InvoiceNumberSequence($definition);
@@ -44,7 +44,7 @@ class YearlyTest extends NumberGeneratorTestBase {
     $sequence = new InvoiceNumberSequence([
       'store_id' => $this->store->id(),
       'generated' => strtotime('today'),
-      'plugin_id' => 'yearly',
+      'invoice_type' => 'default',
       'sequence' => 10,
     ]);
     $invoice = Invoice::create([

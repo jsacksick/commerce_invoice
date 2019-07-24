@@ -15,15 +15,20 @@ use Drupal\Core\Plugin\PluginFormInterface;
 interface NumberGeneratorInterface extends ConfigurableInterface, DependentPluginInterface, PluginInspectionInterface, PluginFormInterface {
 
   /**
-   * Gets whether the invoice number sequence should be reset.
+   * Gets the invoice number pattern.
    *
-   * @param \Drupal\commerce_invoice\InvoiceNumberSequence $last_sequence
-   *   The last invoice number sequence.
-   *
-   * @return bool
-   *   Whether the invoice number sequence should be reset.
+   * @return string
+   *   The invoice number pattern.
    */
-  public function shouldReset(InvoiceNumberSequence $last_sequence);
+  public function getPattern();
+
+  /**
+   * Gets the invoice number padding.
+   *
+   * @return int
+   *   The invoice number padding.
+   */
+  public function getPadding();
 
   /**
    * Generate an invoice number for the given invoice, and the given sequence.
@@ -37,5 +42,16 @@ interface NumberGeneratorInterface extends ConfigurableInterface, DependentPlugi
    *   The generated invoice number.
    */
   public function generate(InvoiceInterface $invoice, InvoiceNumberSequence $invoice_number_sequence);
+
+  /**
+   * Gets whether the invoice number sequence should be reset.
+   *
+   * @param \Drupal\commerce_invoice\InvoiceNumberSequence $last_sequence
+   *   The last invoice number sequence.
+   *
+   * @return bool
+   *   Whether the invoice number sequence should be reset.
+   */
+  public function shouldReset(InvoiceNumberSequence $last_sequence);
 
 }
