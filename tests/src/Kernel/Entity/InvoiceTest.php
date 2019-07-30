@@ -5,6 +5,7 @@ namespace Drupal\Tests\commerce_invoice\Kernel\Entity;
 use Drupal\commerce_invoice\Entity\Invoice;
 use Drupal\commerce_order\Adjustment;
 use Drupal\commerce_invoice\Entity\InvoiceItem;
+use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_price\Price;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\profile\Entity\Profile;
@@ -33,6 +34,8 @@ class InvoiceTest extends InvoiceKernelTestBase {
   protected function setUp() {
     parent::setUp();
 
+    $this->installConfig('commerce_order');
+    $this->installEntitySchema('commerce_order');
     $user = $this->createUser();
     $this->user = $this->reloadEntity($user);
   }
@@ -52,6 +55,8 @@ class InvoiceTest extends InvoiceKernelTestBase {
    * @covers ::setCustomerId
    * @covers ::getBillingProfile
    * @covers ::setBillingProfile
+   * @covers ::getOrders
+   * @covers ::setOrders
    * @covers ::getItems
    * @covers ::setItems
    * @covers ::hasItems
@@ -153,6 +158,15 @@ class InvoiceTest extends InvoiceKernelTestBase {
 
     $invoice->setBillingProfile($profile);
     $this->assertEquals($profile, $invoice->getBillingProfile());
+
+    $order = Order::create([
+      'type' => 'default',
+      'state' => 'completed',
+    ]);
+    $order->save();
+    $order = $this->reloadEntity($order);
+    $invoice->setOrders([$order]);
+    $this->assertEquals([$order], $invoice->getOrders());
 
     $invoice->setItems([$invoice_item, $another_invoice_item]);
     $this->assertEquals([$invoice_item, $another_invoice_item], $invoice->getItems());

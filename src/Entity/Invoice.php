@@ -168,6 +168,21 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
   /**
    * {@inheritdoc}
    */
+  public function getOrders() {
+    return $this->get('orders')->referencedEntities();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setOrders(array $orders) {
+    $this->set('orders', $orders);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getItems() {
     return $this->get('invoice_items')->referencedEntities();
   }
@@ -588,6 +603,14 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
       ->setSetting('handler', 'default')
       ->setSetting('handler_settings', ['target_bundles' => ['customer']])
       ->setTranslatable(TRUE);
+
+    $fields['orders'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Orders'))
+      ->setDescription(t('The invoice orders.'))
+      ->setRequired(TRUE)
+      ->setCardinality(BaseFieldDefinition::CARDINALITY_UNLIMITED)
+      ->setSetting('target_type', 'commerce_order')
+      ->setSetting('handler', 'default');
 
     $fields['invoice_items'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Invoice items'))

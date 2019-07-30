@@ -128,6 +128,24 @@ interface InvoiceInterface extends ContentEntityInterface, EntityAdjustableInter
   public function setBillingProfile(ProfileInterface $profile);
 
   /**
+   * Gets the invoice orders.
+   *
+   * @return \Drupal\commerce_order\Entity\OrderInterface[]
+   *   The invoice orders.
+   */
+  public function getOrders();
+
+  /**
+   * Sets the invoice orders.
+   *
+   * @param \Drupal\commerce_order\Entity\OrderInterface[] $orders
+   *   The invoice orders.
+   *
+   * @return $this
+   */
+  public function setOrders(array $orders);
+
+  /**
    * Gets the invoice items.
    *
    * @return \Drupal\commerce_invoice\Entity\InvoiceItemInterface[]

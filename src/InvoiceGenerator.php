@@ -92,6 +92,7 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
     if ($total_paid) {
       $invoice->setTotalPaid($total_paid);
     }
+    $invoice->setOrders($orders);
     $invoice->save();
     return $invoice;
   }
