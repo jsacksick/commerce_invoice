@@ -8,9 +8,11 @@
 use Drupal\commerce\EntityHelper;
 use Drupal\commerce\PurchasableEntityInterface;
 use Drupal\commerce_invoice\Entity\InvoiceType;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
+use Drupal\Core\Url;
 
 /**
  * Implements hook_entity_bundle_info().
@@ -143,4 +145,30 @@ function template_preprocess_commerce_invoice(array &$variables) {
 function commerce_invoice_views_data_alter(array &$data) {
   $data['commerce_invoice']['store_id']['field']['id'] = 'commerce_store';
   $data['commerce_invoice']['state']['filter']['id'] = 'state_machine_state';
+}
+
+/**
+ * Implements hook_entity_operation().
+ */
+function commerce_invoice_entity_operation(EntityInterface $entity) {
+  // Only show the "Shipments" operation link for commerce_order entities.
+  if ($entity->getEntityTypeId() !== 'commerce_order') {
+    return;
+  }
+  // Do not show for a "cart" order.
+  if ($entity->hasField('cart') && $entity->get('cart')->value) {
+    return;
+  }
+  // Only show if the user has the "administer commerce_invoice" permission.
+  if (!\Drupal::currentUser()->hasPermission('create any commerce_invoice entity')) {
+    return;
+  }
+  $operations['invoice'] = [
+    'title' => t('Download invoice'),
+    'url' => Url::fromRoute('entity.commerce_invoice.generate', [
+      'commerce_order' => $entity->id(),
+    ]),
+    'weight' => 50,
+  ];
+  return $operations;
 }
