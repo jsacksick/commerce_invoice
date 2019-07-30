@@ -98,13 +98,16 @@ class InvoiceGenerateForm extends FormBase {
     /** @var \Drupal\commerce_order\OrderStorage $order_storage */
     $order_storage = $this->entityTypeManager->getStorage('commerce_order');
     $orders = $order_storage->loadMultiple($values['orders']);
+    /** @var \Drupal\commerce_store\StoreStorageInterface $store_storage */
+    $store_storage = $this->entityTypeManager->getStorage('commerce_store');
+    /** @var \Drupal\commerce_store\Entity\StoreInterface $store */
+    $store = $store_storage->load($values['store_id']);
     /** @var \Drupal\commerce_order\Entity\OrderInterface $first_order */
     $first_order = reset($orders);
     $invoice_values = [
-      'store_id' => $values['store_id'],
       'uid' => $values['uid'],
     ];
-    $invoice = $this->invoiceGenerator->generate($orders, $first_order->getBillingProfile(), $invoice_values);
+    $invoice = $this->invoiceGenerator->generate($orders, $store, $first_order->getBillingProfile(), $invoice_values);
     if ($invoice) {
       $this->messenger()->addMessage($this->t('The invoice %label has been successfully saved.', ['%label' => $invoice->label()]));
     }

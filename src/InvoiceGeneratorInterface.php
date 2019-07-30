@@ -2,6 +2,7 @@
 
 namespace Drupal\commerce_invoice;
 
+use Drupal\commerce_store\Entity\StoreInterface;
 use Drupal\profile\Entity\ProfileInterface;
 
 interface InvoiceGeneratorInterface {
@@ -13,6 +14,8 @@ interface InvoiceGeneratorInterface {
    *
    * @param \Drupal\commerce_order\Entity\OrderInterface[] $orders
    *   The orders to generate an invoice for.
+   * @param \Drupal\commerce_Store\Entity\StoreInterface $store
+   *   The store.
    * @param \Drupal\profile\Entity\ProfileInterface $profile
    *   The billing profile.
    * @param array $values
@@ -22,6 +25,6 @@ interface InvoiceGeneratorInterface {
    * @return \Drupal\commerce_invoice\Entity\InvoiceInterface|null
    *   The generated invoice, NULL if it could not be generated.
    */
-  public function generate(array $orders, ProfileInterface $profile, array $values = []);
+  public function generate(array $orders, StoreInterface $store, ProfileInterface $profile, array $values = []);
 
 }

@@ -4,10 +4,10 @@ namespace Drupal\commerce_invoice;
 
 use Drupal\commerce_order\Entity\OrderItemType;
 use Drupal\commerce_order\Entity\OrderType;
+use Drupal\commerce_store\Entity\StoreInterface;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\profile\Entity\ProfileInterface;
-use Psr\Log\LoggerInterface;
 
 class InvoiceGenerator implements InvoiceGeneratorInterface {
 
@@ -41,10 +41,10 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
   /**
    * {@inheritdoc}
    */
-  public function generate(array $orders, ProfileInterface $profile, array $values = []) {
+  public function generate(array $orders, StoreInterface $store, ProfileInterface $profile, array $values = []) {
     $transaction = $this->connection->startTransaction();
     try {
-      return $this->doGenerate($orders, $profile, $values);
+      return $this->doGenerate($orders, $store, $profile, $values);
     }
     catch (\Exception $exception) {
       $transaction->rollBack();
@@ -53,7 +53,7 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
     }
   }
 
-  protected function doGenerate(array $orders, ProfileInterface $profile, array $values = []) {
+  protected function doGenerate(array $orders, StoreInterface $store, ProfileInterface $profile, array $values = []) {
     $invoice_storage = $this->entityTypeManager->getStorage('commerce_invoice');
     $invoice_item_storage = $this->entityTypeManager->getStorage('commerce_invoice_item');
     // Assume the order type from the first passed order, we'll use it
@@ -63,6 +63,7 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
     $order_type = OrderType::load($first_order->bundle());
     $values += [
       'type' => $order_type->getThirdPartySetting('commerce_invoice', 'invoice_type', 'default'),
+      'store_id' => $store->id(),
     ];
     /** @var \Drupal\commerce_invoice\Entity\InvoiceInterface $invoice */
     $invoice = $invoice_storage->create($values);
