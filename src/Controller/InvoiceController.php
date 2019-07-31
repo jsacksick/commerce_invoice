@@ -12,6 +12,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Provides the invoice generate page.
@@ -62,15 +63,18 @@ class InvoiceController implements ContainerInjectionInterface {
    *
    * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
    *   The route match.
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request.
    *
    * @return \Symfony\Component\HttpFoundation\RedirectResponse
    *   The redirect response.
    */
-  public function generate(RouteMatchInterface $route_match) {
+  public function generate(RouteMatchInterface $route_match, Request $request) {
     /** @var \Drupal\commerce_order\Entity\OrderInterface $order */
     $order = $route_match->getParameter('commerce_order');
     /** @var \Drupal\commerce_invoice\Entity\ $invoice_storage */
     $invoice_storage = $this->entityTypeManager->getStorage('commerce_invoice');
+    // Check if the given order is already referenced by an existing invoice.
     $invoice_ids = $invoice_storage->getQuery()
       ->condition('orders', [$order->id()], 'IN')
       ->accessCheck(FALSE)
@@ -87,6 +91,10 @@ class InvoiceController implements ContainerInjectionInterface {
       'entity_id' => $invoice_id,
       'entity_type' => 'commerce_invoice',
     ]);
+    // We have to remove the destination, otherwise the redirect doesn't happen.
+    if ($request->query->has('destination')) {
+      $request->query->remove('destination');
+    }
     return new RedirectResponse($url->toString());
   }
 
