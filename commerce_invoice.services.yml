@@ -16,6 +16,12 @@ services:
     tags:
       - { name: event_subscriber }
 
+  commerce_invoice.order_paid_subscriber:
+    class: Drupal\commerce_invoice\EventSubscriber\OrderPaidSubscriber
+    arguments: ['@entity_type.manager']
+    tags:
+      - { name: event_subscriber }
+
   logger.channel.commerce_invoice:
     class: Drupal\Core\Logger\LoggerChannel
     factory: logger.factory:get

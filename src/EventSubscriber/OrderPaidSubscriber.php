@@ -1,0 +1,65 @@
+<?php
+
+namespace Drupal\commerce_invoice\EventSubscriber;
+
+use Drupal\commerce_order\Event\OrderEvent;
+use Drupal\commerce_price\Price;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
+class OrderPaidSubscriber implements EventSubscriberInterface {
+
+  /**
+   * The invoice storage.
+   *
+   * @var \Drupal\Core\Entity\EntityStorageInterface
+   */
+  protected $invoiceStorage;
+
+  /**
+   * Constructs a new OrderPaidSubscriber object.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The payment order updater.
+   */
+  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
+    $this->invoiceStorage = $entity_type_manager->getStorage('commerce_invoice');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function getSubscribedEvents() {
+    $events = [
+      'commerce_order.order.paid' => 'onPaid',
+    ];
+    return $events;
+  }
+
+  /**
+   * Updates the invoice total paid when an order is paid.
+   *
+   * @param \Drupal\commerce_order\Event\OrderEvent $event
+   *   The order event.
+   */
+  public function onPaid(OrderEvent $event) {
+    $order = $event->getOrder();
+    $invoice_ids = $this->invoiceStorage->getQuery()
+      ->condition('state', 'pending')
+      ->condition('orders', [$order->id()], 'IN')
+      ->accessCheck(FALSE)
+      ->execute();
+
+    // No pending invoice reference the order being paid, aborting.
+    if (!$invoice_ids) {
+      return;
+    }
+    /** @var \Drupal\commerce_invoice\Entity\InvoiceInterface $invoice */
+    $invoice = $this->invoiceStorage->load(reset($invoice_ids));
+    $total_paid = $invoice->getTotalPaid();
+    $total_paid = $total_paid ? $total_paid->add($order->getTotalPaid()) : $order->getTotalPaid();
+    $invoice->setTotalPaid($total_paid);
+    $invoice->save();
+  }
+
+}
