@@ -33,10 +33,14 @@ abstract class InvoiceKernelTestBase extends CommerceKernelTestBase {
     parent::setUp();
 
     $this->installEntitySchema('profile');
+    $this->installEntitySchema('commerce_order');
     $this->installEntitySchema('commerce_order_item');
     $this->installEntitySchema('commerce_invoice');
     $this->installEntitySchema('commerce_invoice_item');
-    $this->installConfig('commerce_invoice');
+    $this->installConfig([
+      'commerce_invoice',
+      'commerce_order',
+    ]);
     $this->installSchema('commerce_invoice', ['commerce_invoice_number_sequence']);
   }
 
