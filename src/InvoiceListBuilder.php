@@ -54,8 +54,12 @@ class InvoiceListBuilder extends EntityListBuilder {
    */
   public function buildHeader() {
     $header = [
-      'invoice' => [
-        'data' => $this->t('Invoice ID'),
+      'invoice_number' => [
+        'data' => $this->t('Invoice number'),
+        'class' => [RESPONSIVE_PRIORITY_LOW],
+      ],
+      'date' => [
+        'data' => $this->t('Date'),
         'class' => [RESPONSIVE_PRIORITY_LOW],
       ],
       'type' => [
@@ -70,10 +74,6 @@ class InvoiceListBuilder extends EntityListBuilder {
         'data' => $this->t('State'),
         'class' => [RESPONSIVE_PRIORITY_LOW],
       ],
-      'created' => [
-        'data' => $this->t('Created'),
-        'class' => [RESPONSIVE_PRIORITY_LOW],
-      ],
     ];
 
     return $header + parent::buildHeader();
@@ -85,7 +85,8 @@ class InvoiceListBuilder extends EntityListBuilder {
   public function buildRow(EntityInterface $entity) {
     $invoice_type = InvoiceType::load($entity->bundle());
     $row = [
-      'invoice_id' => $entity->id(),
+      'invoice_number' => $entity->label(),
+      'date' => $this->dateFormatter->format($entity->getInvoiceDateTime(), 'short'),
       'type' => $invoice_type->label(),
       'customer' => [
         'data' => [
@@ -94,7 +95,6 @@ class InvoiceListBuilder extends EntityListBuilder {
         ],
       ],
       'state' => $entity->getState()->getLabel(),
-      'created' => $this->dateFormatter->format($entity->getCreatedTime(), 'short'),
     ];
 
     return $row + parent::buildRow($entity);

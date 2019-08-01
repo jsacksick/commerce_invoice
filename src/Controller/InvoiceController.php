@@ -120,7 +120,7 @@ class InvoiceController implements ContainerInjectionInterface {
     // The invoice generator service needs a store and a billing profile.
     $order_requirements = !empty($order->getStoreId()) && !empty($order->getBillingProfile());
     $access = AccessResult::allowedIf($order_requirements)
-      ->andIf(AccessResult::allowedIfHasPermission($account, 'create any commerce_invoice entity'))
+      ->andIf(AccessResult::allowedIfHasPermission($account, 'administer commerce_invoice'))
       ->addCacheableDependency($order);
 
     return $access;

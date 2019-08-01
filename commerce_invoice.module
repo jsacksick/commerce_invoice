@@ -160,7 +160,7 @@ function commerce_invoice_entity_operation(EntityInterface $entity) {
     return;
   }
   // Only show if the user has the "administer commerce_invoice" permission.
-  if (!\Drupal::currentUser()->hasPermission('create any commerce_invoice entity')) {
+  if (!\Drupal::currentUser()->hasPermission('administer commerce_invoice')) {
     return;
   }
   $operations['invoice'] = [

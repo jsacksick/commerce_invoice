@@ -59,7 +59,7 @@ use Drupal\user\UserInterface;
  *   },
  *   links = {
  *     "delete-form" = "/admin/commerce/invoices/{commerce_invoice}/delete",
- *     "generate-form" = "/admin/commerce/invoices/generate",
+ *     "generate" = "/admin/commerce/invoices/generate/{commerce_order}",
  *     "collection" = "/admin/commerce/invoices",
  *   },
  *   bundle_entity_type = "commerce_invoice_type",

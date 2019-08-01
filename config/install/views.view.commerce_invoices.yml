@@ -722,7 +722,7 @@ display:
           admin_label: ''
           empty: true
           tokenize: false
-          content: 'No invoices available.'
+          content: 'There are no invoices yet.'
           plugin_id: text_custom
       relationships: {  }
       arguments: {  }

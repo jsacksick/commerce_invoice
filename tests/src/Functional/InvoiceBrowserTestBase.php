@@ -26,6 +26,7 @@ abstract class InvoiceBrowserTestBase extends CommerceBrowserTestBase {
     return array_merge([
       'administer commerce_invoice',
       'administer commerce_invoice_type',
+      'access commerce_invoice overview',
     ], parent::getAdministratorPermissions());
   }
 
