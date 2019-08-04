@@ -22,6 +22,12 @@ services:
     tags:
       - { name: event_subscriber }
 
+  commerce_invoice.order_placed_subscriber:
+    class: Drupal\commerce_invoice\EventSubscriber\OrderPlacedSubscriber
+    arguments: ['@commerce_invoice.invoice_generator']
+    tags:
+      - { name: event_subscriber }
+
   logger.channel.commerce_invoice:
     class: Drupal\Core\Logger\LoggerChannel
     factory: logger.factory:get

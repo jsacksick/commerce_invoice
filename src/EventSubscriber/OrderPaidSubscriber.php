@@ -3,7 +3,6 @@
 namespace Drupal\commerce_invoice\EventSubscriber;
 
 use Drupal\commerce_order\Event\OrderEvent;
-use Drupal\commerce_price\Price;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -20,7 +19,7 @@ class OrderPaidSubscriber implements EventSubscriberInterface {
    * Constructs a new OrderPaidSubscriber object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The payment order updater.
+   *   The entity type manager.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager) {
     $this->invoiceStorage = $entity_type_manager->getStorage('commerce_invoice');

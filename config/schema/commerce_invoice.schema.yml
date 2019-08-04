@@ -24,6 +24,9 @@ commerce_order.commerce_order_type.*.third_party.commerce_invoice:
     invoice_type:
       type: string
       label: 'Invoice type'
+    order_placed_generation:
+      type: boolean
+      label: 'Order placed generation'
 
 commerce_invoice.commerce_number_generator.plugin.*:
   type: mapping
