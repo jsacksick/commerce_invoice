@@ -2,6 +2,9 @@ commerce_invoice.commerce_invoice_type.*:
   type: commerce_config_entity_bundle
   label: 'Invoice type'
   mapping:
+    numberPattern:
+      type: string
+      label: 'The number pattern'
     footerText:
       type: text
       label: 'Footer text'

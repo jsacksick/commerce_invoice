@@ -3,12 +3,8 @@ status: true
 dependencies: {  }
 label: Default
 id: default
+numberPattern: invoice_infinite
 footerText: ''
 paymentTerms: ''
-numberGenerator: infinite
-numberGeneratorConfiguration:
-  initialNumber: 1
-  pattern: '{number}'
-  padding: 0
 workflow: invoice_default
 traits: {  }

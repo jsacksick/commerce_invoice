@@ -1,0 +1,12 @@
+langcode: en
+status: true
+dependencies: {  }
+id: invoice_infinite
+label: Infinite
+type: commerce_invoice
+plugin: infinite
+configuration:
+  pattern: '{sequence}'
+  perStoreSequence: true
+  initialSequence: 1
+  padding: 0

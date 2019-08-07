@@ -4,6 +4,7 @@ namespace Drupal\commerce_invoice\Entity;
 
 use Drupal\commerce\CommerceSinglePluginCollection;
 use Drupal\commerce\Entity\CommerceBundleEntityBase;
+use Drupal\commerce_number_pattern\Entity\NumberPattern;
 
 /**
  * Defines the invoice type entity class.
@@ -45,6 +46,7 @@ use Drupal\commerce\Entity\CommerceBundleEntityBase;
  *   config_export = {
  *     "label",
  *     "id",
+ *     "numberPattern",
  *     "footerText",
  *     "paymentTerms",
  *     "workflow",
@@ -60,6 +62,13 @@ use Drupal\commerce\Entity\CommerceBundleEntityBase;
  * )
  */
 class InvoiceType extends CommerceBundleEntityBase implements InvoiceTypeInterface {
+
+  /**
+   * The number pattern entity.
+   *
+   * @var \Drupal\commerce_number_pattern\Entity\NumberPatternInterface
+   */
+  protected $numberPattern;
 
   /**
    * The invoice type footer text.
@@ -81,6 +90,30 @@ class InvoiceType extends CommerceBundleEntityBase implements InvoiceTypeInterfa
    * @var string
    */
   protected $workflow;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getNumberPattern() {
+    if ($this->getNumberPatternId()) {
+      return NumberPattern::load($this->getNumberPatternId());
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getNumberPatternId() {
+    return $this->numberPattern;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setNumberPatternId($number_pattern) {
+    $this->numberPattern = $number_pattern;
+    return $this;
+  }
 
   /**
    * {@inheritdoc}

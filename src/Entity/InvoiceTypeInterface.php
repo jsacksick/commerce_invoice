@@ -10,6 +10,32 @@ use Drupal\commerce\Entity\CommerceBundleEntityInterface;
 interface InvoiceTypeInterface extends CommerceBundleEntityInterface {
 
   /**
+   * Gets the invoice type's number pattern.
+   **
+   * @return \Drupal\commerce_number_pattern\Entity\NumberPatternInterface
+   *   The invoice type number pattern.
+   */
+  public function getNumberPattern();
+
+  /**
+   * Gets the invoice type's number pattern ID.
+   **
+   * @return string
+   *   The invoice type number pattern ID.
+   */
+  public function getNumberPatternId();
+
+  /**
+   * Sets the number pattern ID of the invoice type.
+   *
+   * @param string $number_pattern
+   *   The number pattern.
+   *
+   * @return $this
+   */
+  public function setNumberPatternId($number_pattern);
+
+  /**
    * Gets the invoice type's footer text.
    **
    * @return string

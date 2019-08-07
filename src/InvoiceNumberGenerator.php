@@ -15,9 +15,14 @@ class InvoiceNumberGenerator implements InvoiceNumberGeneratorInterface {
    */
   public function generateInvoiceNumber(InvoiceInterface $invoice) {
     $invoice_type = InvoiceType::load($invoice->bundle());
-    // @todo: Get the number pattern config entity from the invoice type and
-    // call the number generator plugin to generate a number.
-    return 10;
+    /** @var \Drupal\commerce_number_pattern\Entity\NumberPatternInterface $number_pattern */
+    $number_pattern = $invoice_type->getNumberPattern();
+
+    if (!$number_pattern) {
+      return NULL;
+    }
+
+    return $number_pattern->getPlugin()->generate($invoice);
   }
 
 }

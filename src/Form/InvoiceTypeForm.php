@@ -2,6 +2,7 @@
 
 namespace Drupal\commerce_invoice\Form;
 
+use Drupal\commerce\EntityHelper;
 use Drupal\commerce\EntityTraitManagerInterface;
 use Drupal\commerce\Form\CommerceBundleEntityFormBase;
 use Drupal\Component\Utility\Html;
@@ -77,6 +78,22 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
       ],
       '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
       '#disabled' => !$invoice_type->isNew(),
+    ];
+    $storage = $this->entityTypeManager->getStorage('commerce_number_pattern');
+    $query = $storage->getQuery();
+    $query->condition('type', 'commerce_invoice');
+    $number_patterns = $query->execute();
+    $options = [];
+    if ($number_patterns) {
+      $number_patterns = $storage->loadMultiple($number_patterns);
+      $options = EntityHelper::extractLabels($number_patterns);
+    }
+    $form['numberPattern'] = [
+      '#type' => 'select',
+      '#default_value' => $invoice_type->getNumberPatternId() ?: key($options),
+      '#title' => $this->t('Number pattern'),
+      '#options' => $options,
+      '#required' => TRUE,
     ];
     $token_types = ['commerce_invoice'];
     $form['footerText'] = [

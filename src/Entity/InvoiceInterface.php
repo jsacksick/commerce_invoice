@@ -4,6 +4,7 @@ namespace Drupal\commerce_invoice\Entity;
 
 use Drupal\commerce_order\EntityAdjustableInterface;
 use Drupal\commerce_price\Price;
+use Drupal\commerce_store\Entity\EntityStoreInterface;
 use Drupal\commerce_store\Entity\StoreInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\ContentEntityInterface;
@@ -15,7 +16,7 @@ use Drupal\user\UserInterface;
 /**
  * Defines the interface for invoices.
  */
-interface InvoiceInterface extends ContentEntityInterface, EntityAdjustableInterface, EntityChangedInterface, EntityOwnerInterface {
+interface InvoiceInterface extends ContentEntityInterface, EntityAdjustableInterface, EntityChangedInterface, EntityOwnerInterface, EntityStoreInterface {
 
   /**
    * Gets the invoice number.
@@ -34,42 +35,6 @@ interface InvoiceInterface extends ContentEntityInterface, EntityAdjustableInter
    * @return $this
    */
   public function setInvoiceNumber($invoice_number);
-
-  /**
-   * Gets the store.
-   *
-   * @return \Drupal\commerce_store\Entity\StoreInterface|null
-   *   The store entity, or null.
-   */
-  public function getStore();
-
-  /**
-   * Sets the store.
-   *
-   * @param \Drupal\commerce_store\Entity\StoreInterface $store
-   *   The store entity.
-   *
-   * @return $this
-   */
-  public function setStore(StoreInterface $store);
-
-  /**
-   * Gets the store ID.
-   *
-   * @return int
-   *   The store ID.
-   */
-  public function getStoreId();
-
-  /**
-   * Sets the store ID.
-   *
-   * @param int $store_id
-   *   The store ID.
-   *
-   * @return $this
-   */
-  public function setStoreId($store_id);
 
   /**
    * Gets the customer user.

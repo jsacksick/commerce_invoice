@@ -14,8 +14,8 @@ interface InvoiceNumberGeneratorInterface {
    * @param InvoiceInterface $invoice
    *   The invoice to generate a number for.
    *
-   * @return string
-   *   The generated invoice number.
+   * @return string|null
+   *   The generated invoice number, or NULL if it could not be generated.
    */
   public function generateInvoiceNumber(InvoiceInterface $invoice);
 
