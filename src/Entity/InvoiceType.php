@@ -47,8 +47,6 @@ use Drupal\commerce\Entity\CommerceBundleEntityBase;
  *     "id",
  *     "footerText",
  *     "paymentTerms",
- *     "numberGenerator",
- *     "numberGeneratorConfiguration",
  *     "workflow",
  *     "traits",
  *   },
@@ -76,27 +74,6 @@ class InvoiceType extends CommerceBundleEntityBase implements InvoiceTypeInterfa
    * @var string
    */
   protected $paymentTerms;
-
-  /**
-   * The number generator plugin ID.
-   *
-   * @var string
-   */
-  protected $numberGenerator = 'infinite';
-
-  /**
-   * The number generator plugin configuration.
-   *
-   * @var array
-   */
-  protected $numberGeneratorConfiguration = [];
-
-  /**
-   * The plugin collection that holds the number generator plugin.
-   *
-   * @var \Drupal\commerce\CommerceSinglePluginCollection
-   */
-  protected $numberGeneratorPluginCollection;
 
   /**
    * The invoice type workflow ID.
@@ -138,46 +115,6 @@ class InvoiceType extends CommerceBundleEntityBase implements InvoiceTypeInterfa
   /**
    * {@inheritdoc}
    */
-  public function getNumberGeneratorId() {
-    return $this->numberGenerator;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setNumberGeneratorId($number_generator_id) {
-    $this->numberGenerator = $number_generator_id;
-    $this->numberGeneratorConfiguration = [];
-    $this->numberGeneratorPluginCollection = NULL;
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getNumberGenerator() {
-    return $this->getNumberGeneratorPluginCollection()->get($this->numberGenerator);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getNumberGeneratorConfiguration() {
-    return $this->numberGeneratorConfiguration;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setNumberGeneratorConfiguration(array $configuration) {
-    $this->numberGeneratorConfiguration = $configuration;
-    $this->numberGeneratorPluginCollection = NULL;
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getWorkflowId() {
     return $this->workflow;
   }
@@ -202,38 +139,6 @@ class InvoiceType extends CommerceBundleEntityBase implements InvoiceTypeInterfa
     $this->calculatePluginDependencies($workflow);
 
     return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function set($property_name, $value) {
-    // Invoke the setters to clear related properties.
-    if ($property_name == 'numberGenerator') {
-      $this->setNumberGeneratorId($value);
-    }
-    elseif ($property_name == 'numberGeneratorConfiguration') {
-      $this->setNumberGeneratorConfiguration($value);
-    }
-    else {
-      return parent::set($property_name, $value);
-    }
-  }
-
-  /**
-   * Gets the plugin collection that holds the number generator plugin.
-   *
-   * Ensures the plugin collection is initialized before returning it.
-   *
-   * @return \Drupal\commerce\CommerceSinglePluginCollection
-   *   The plugin collection.
-   */
-  protected function getNumberGeneratorPluginCollection() {
-    if (!$this->numberGeneratorPluginCollection) {
-      $plugin_manager = \Drupal::service('plugin.manager.commerce_number_generator');
-      $this->numberGeneratorPluginCollection = new CommerceSinglePluginCollection($plugin_manager, $this->numberGenerator, $this->numberGeneratorConfiguration, $this->id);
-    }
-    return $this->numberGeneratorPluginCollection;
   }
 
 }

@@ -41,7 +41,6 @@ abstract class InvoiceKernelTestBase extends CommerceKernelTestBase {
       'commerce_invoice',
       'commerce_order',
     ]);
-    $this->installSchema('commerce_invoice', ['commerce_invoice_number_sequence']);
   }
 
 }

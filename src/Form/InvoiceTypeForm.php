@@ -4,7 +4,6 @@ namespace Drupal\commerce_invoice\Form;
 
 use Drupal\commerce\EntityTraitManagerInterface;
 use Drupal\commerce\Form\CommerceBundleEntityFormBase;
-use Drupal\commerce_invoice\NumberGeneratorManager;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -20,13 +19,6 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
   use EntityDuplicateFormTrait;
 
   /**
-   * The number generator plugin manager.
-   *
-   * @var \Drupal\commerce_invoice\NumberGeneratorManager
-   */
-  protected $numberGeneratorPluginManager;
-
-  /**
    * The workflow manager.
    *
    * @var \Drupal\state_machine\WorkflowManagerInterface
@@ -38,14 +30,11 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
    *
    * @param \Drupal\commerce\EntityTraitManagerInterface $trait_manager
    *   The entity trait manager.
-   * @param \Drupal\commerce_invoice\NumberGeneratorManager $number_generator_manager
-   *   The number generator plugin manager.
    * @param \Drupal\state_machine\WorkflowManagerInterface $workflow_manager
    *   The workflow manager.
    */
-  public function __construct(EntityTraitManagerInterface $trait_manager, NumberGeneratorManager $number_generator_manager, WorkflowManagerInterface $workflow_manager) {
+  public function __construct(EntityTraitManagerInterface $trait_manager, WorkflowManagerInterface $workflow_manager) {
     parent::__construct($trait_manager);
-    $this->numberGeneratorPluginManager = $number_generator_manager;
     $this->workflowManager = $workflow_manager;
   }
 
@@ -55,7 +44,6 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('plugin.manager.commerce_entity_trait'),
-      $container->get('plugin.manager.commerce_number_generator'),
       $container->get('plugin.manager.workflow')
     );
   }
@@ -68,19 +56,6 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
     /** @var \Drupal\commerce_invoice\Entity\InvoiceTypeInterface $invoice_type */
     $invoice_type = $this->entity;
     $workflows = $this->workflowManager->getGroupedLabels('commerce_invoice');
-    $number_generators = array_column($this->numberGeneratorPluginManager->getDefinitions(), 'label', 'id');
-    asort($number_generators);
-
-    // Use the first available number generator as the default value.
-    if (!$invoice_type->getNumberGeneratorId()) {
-      $number_generator_ids = array_keys($number_generators);
-      $number_generator = reset($number_generator_ids);
-      $invoice_type->setNumberGeneratorId($number_generator);
-    }
-    // The form state will have a plugin value if #ajax was used.
-    $number_generator = $form_state->getValue('numberGenerator', $invoice_type->getNumberGeneratorId());
-    // Pass the configuration only if the plugin hasn't been changed via #ajax.
-    $number_generator_configuration = $invoice_type->getNumberGeneratorId() == $number_generator ? $invoice_type->getNumberGeneratorConfiguration() : [];
     $wrapper_id = Html::getUniqueId('invoice-type-form');
     $form['#tree'] = TRUE;
     $form['#prefix'] = '<div id="' . $wrapper_id . '">';
@@ -128,23 +103,6 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
       '#theme' => 'token_tree_link',
       '#token_types' => $token_types,
     ];
-    $form['numberGenerator'] = [
-      '#type' => 'radios',
-      '#title' => $this->t('Invoice number generation method'),
-      '#options' => $number_generators,
-      '#default_value' => $number_generator,
-      '#required' => TRUE,
-      '#ajax' => [
-        'callback' => '::ajaxRefresh',
-        'wrapper' => $wrapper_id,
-      ],
-    ];
-    $form['number_generator_configuration'] = [
-      '#type' => 'commerce_plugin_configuration',
-      '#plugin_type' => 'commerce_number_generator',
-      '#plugin_id' => $number_generator,
-      '#default_value' => $number_generator_configuration,
-    ];
     $form['workflow'] = [
       '#type' => 'select',
       '#title' => $this->t('Workflow'),
@@ -158,29 +116,10 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
   }
 
   /**
-   * Ajax callback.
-   */
-  public static function ajaxRefresh(array $form, FormStateInterface $form_state) {
-    return $form;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     $this->validateTraitForm($form, $form_state);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
-    parent::submitForm($form, $form_state);
-
-    $values = $form_state->getValues();
-    /** @var \Drupal\commerce_invoice\Entity\InvoiceTypeInterface $invoice_type */
-    $invoice_type = $this->entity;
-    $invoice_type->setNumberGeneratorConfiguration($values['number_generator_configuration']);
   }
 
   /**

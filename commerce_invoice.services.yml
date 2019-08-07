@@ -32,7 +32,3 @@ services:
     class: Drupal\Core\Logger\LoggerChannel
     factory: logger.factory:get
     arguments: ['commerce_invoice']
-
-  plugin.manager.commerce_number_generator:
-    class: Drupal\commerce_invoice\NumberGeneratorManager
-    parent: default_plugin_manager

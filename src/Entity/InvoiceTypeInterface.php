@@ -46,50 +46,6 @@ interface InvoiceTypeInterface extends CommerceBundleEntityInterface {
   public function setPaymentTerms($payment_terms);
 
   /**
-   * Gets the number generator plugin ID.
-   *
-   * @return string
-   *   The number generator plugin ID.
-   */
-  public function getNumberGeneratorId();
-
-  /**
-   * Sets the number generator plugin ID.
-   *
-   * @param string $number_generator_id
-   *   The number generator plugin ID.
-   *
-   * @return $this
-   */
-  public function setNumberGeneratorId($number_generator_id);
-
-  /**
-   * Gets the number generator plugin.
-   *
-   * @return \Drupal\commerce_invoice\Plugin\Commerce\NumberGenerator\NumberGeneratorInterface
-   *   The number generator plugin.
-   */
-  public function getNumberGenerator();
-
-  /**
-   * Gets the number generator plugin configuration.
-   *
-   * @return array
-   *   The number generator plugin configuration.
-   */
-  public function getNumberGeneratorConfiguration();
-
-  /**
-   * Sets the number generator plugin configuration.
-   *
-   * @param array $configuration
-   *   The number generator plugin configuration.
-   *
-   * @return $this
-   */
-  public function setNumberGeneratorConfiguration(array $configuration);
-
-  /**
    * Gets the invoice type's workflow ID.
    *
    * Used by the $invoice->state field.
