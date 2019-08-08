@@ -27,8 +27,6 @@ class InvoiceTypeTest extends InvoiceBrowserTestBase {
    * Tests adding an invoice type.
    */
   public function testAdd() {
-    InvoiceType::load('default')->delete();
-
     $this->drupalGet('admin/commerce/config/invoice-types/add');
     $edit = [
       'id' => 'foo',

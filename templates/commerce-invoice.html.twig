@@ -18,7 +18,9 @@
  * @ingroup themeable
  */
 #}
-<h1 id="invoice-number">{{ 'Invoice @number'|t({'@number': invoice_entity.getInvoiceNumber}) }}</h1>
+{% if (logo_url) %}
+  <img src="{{ logo_url }}"/>
+{% endif %}
 <div class="invoice-header">
   {% if (billing_information) %}
     <div class="billing-information">

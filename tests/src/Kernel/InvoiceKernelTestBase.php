@@ -22,6 +22,7 @@ abstract class InvoiceKernelTestBase extends CommerceKernelTestBase {
     'profile',
     'state_machine',
     'commerce_order',
+    'commerce_number_pattern',
     'commerce_invoice',
     'commerce_invoice_test',
   ];
@@ -41,6 +42,8 @@ abstract class InvoiceKernelTestBase extends CommerceKernelTestBase {
       'commerce_invoice',
       'commerce_order',
     ]);
+    $this->installEntitySchema('commerce_number_pattern');
+    $this->installSchema('commerce_number_pattern', ['commerce_number_pattern_sequence']);
   }
 
 }

@@ -2,7 +2,8 @@
 
 namespace Drupal\Tests\commerce_invoice\Kernel\Entity;
 
-use Drupal\commerce_invoice\Plugin\Commerce\NumberGenerator\NumberGeneratorInterface;
+use Drupal\commerce_number_pattern\Entity\NumberPatternInterface;
+use Drupal\file\Entity\File;
 use Drupal\Tests\commerce_invoice\Kernel\InvoiceKernelTestBase;
 
 /**
@@ -15,31 +16,69 @@ use Drupal\Tests\commerce_invoice\Kernel\InvoiceKernelTestBase;
 class InvoiceTypeTest extends InvoiceKernelTestBase {
 
   /**
+   * A test file.
+   *
+   * @var \Drupal\file\FileInterface
+   */
+  protected $file;
+
+  /**
+   * Modules to enable.
+   *
+   * @var array
+   */
+  public static $modules = ['file'];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+    $this->installEntitySchema('file');
+    $file = File::create([
+      'fid' => 1,
+      'filename' => 'test.png',
+      'filesize' => 100,
+      'uri' => 'public://images/test.png',
+      'filemime' => 'image/png',
+    ]);
+    $file->save();
+    $this->file = $this->reloadEntity($file);
+  }
+
+  /**
    * @covers ::id
    * @covers ::label
+   * @covers ::getNumberPattern
+   * @covers ::getNumberPatternId
+   * @covers ::setNumberPatternId
+   * @covers ::getLogoUrl
+   * @covers ::getLogoFile
+   * @covers ::setLogo
    * @covers ::getFooterText
    * @covers ::setFooterText
    * @covers ::getPaymentTerms
    * @covers ::setPaymentTerms
-   * @covers ::getNumberGeneratorId
-   * @covers ::setNumberGeneratorId
-   * @covers ::getNumberGenerator
-   * @covers ::getNumberGeneratorConfiguration
-   * @covers ::setNumberGeneratorConfiguration
    */
   public function testInvoiceType() {
     $values = [
       'footerText' => $this->randomString(),
       'paymentTerms' => $this->randomString(),
-      'numberGenerator' => 'monthly',
-      'numberGeneratorConfiguration' => [
-        'pattern' => '[current-date:custom:Y-m]-{number}',
-        'padding' => 2,
-      ],
+      'numberPattern' => 'invoice_infinite',
+      'logo' => $this->file->uuid(),
     ];
     $invoice_type = $this->createInvoiceType('test_id', 'Test label', $values);
     $this->assertEquals('test_id', $invoice_type->id());
     $this->assertEquals('Test label', $invoice_type->label());
+
+    $this->assertEquals($values['numberPattern'], $invoice_type->getNumberPatternId());
+    $this->assertInstanceOf(NumberPatternInterface::class, $invoice_type->getNumberPattern());
+    $invoice_type->setNumberPatternId('test');
+    $this->assertEquals('test', $invoice_type->getNumberPatternId());
+
+    $this->assertEquals($this->file->createFileUrl(FALSE), $invoice_type->getLogoUrl());
+    $this->assertEquals($this->file, $invoice_type->getLogoFile());
+
     $this->assertEquals($values['footerText'], $invoice_type->getFooterText());
     $invoice_type->setFooterText('Footer text (modified)');
     $this->assertEquals('Footer text (modified)', $invoice_type->getFooterText());
@@ -47,23 +86,6 @@ class InvoiceTypeTest extends InvoiceKernelTestBase {
     $this->assertEquals($values['paymentTerms'], $invoice_type->getPaymentTerms());
     $invoice_type->setPaymentTerms('Payment terms (modified)');
     $this->assertEquals('Payment terms (modified)', $invoice_type->getPaymentTerms());
-
-    $number_generator = $invoice_type->getNumberGenerator();
-    $this->assertInstanceOf(NumberGeneratorInterface::class, $number_generator);
-    $this->assertEquals('monthly', $number_generator->getPluginId());
-    $this->assertEquals($invoice_type->getNumberGeneratorConfiguration(), $number_generator->getConfiguration());
-    $invoice_type->setNumberGeneratorConfiguration([
-      'pattern' => 'INV-[current-date:custom:Y-m]-{number}',
-      'padding' => 5,
-    ]);
-    $this->assertEquals([
-      'pattern' => 'INV-[current-date:custom:Y-m]-{number}',
-      'padding' => 5,
-    ], $invoice_type->getNumberGeneratorConfiguration());
-
-    $invoice_type->setNumberGeneratorId('yearly');
-    $this->assertEquals('yearly', $invoice_type->getNumberGeneratorId());
-    $this->assertEmpty($invoice_type->getNumberGeneratorConfiguration());
   }
 
 }

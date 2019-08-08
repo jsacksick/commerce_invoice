@@ -95,6 +95,20 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
       '#options' => $options,
       '#required' => TRUE,
     ];
+
+    $form['logo_file'] = [
+      '#title' => $this->t('Logo'),
+      '#type' => 'managed_file',
+      '#upload_location' => 'public://commerce_invoice_type_icon/',
+      '#upload_validators' => [
+        'file_validate_extensions' => ['png jpg svg'],
+      ],
+    ];
+
+    if ($file = $invoice_type->getLogoFile()) {
+      $form['logo_file']['#default_value'] = ['target_id' => $file->id()];
+    }
+
     $token_types = ['commerce_invoice'];
     $form['footerText'] = [
       '#type' => 'textarea',
@@ -137,6 +151,16 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     $this->validateTraitForm($form, $form_state);
+    /** @var \Drupal\commerce_invoice\Entity\InvoiceTypeInterface $invoice_type */
+    $invoice_type = $this->entity;
+
+    $logo_file = $form_state->getValue(['logo_file', '0']);
+    if (!empty($logo_file) && $file = $this->entityTypeManager->getStorage('file')->load($logo_file)) {
+      $invoice_type->setLogo($file->uuid());
+    }
+    else {
+      $invoice_type->setLogo(NULL);
+    }
   }
 
   /**

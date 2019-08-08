@@ -5,6 +5,7 @@ namespace Drupal\commerce_invoice\Entity;
 use Drupal\commerce\CommerceSinglePluginCollection;
 use Drupal\commerce\Entity\CommerceBundleEntityBase;
 use Drupal\commerce_number_pattern\Entity\NumberPattern;
+use Drupal\paragraphs\ParagraphsBehaviorCollection;
 
 /**
  * Defines the invoice type entity class.
@@ -47,6 +48,7 @@ use Drupal\commerce_number_pattern\Entity\NumberPattern;
  *     "label",
  *     "id",
  *     "numberPattern",
+ *     "logo",
  *     "footerText",
  *     "paymentTerms",
  *     "workflow",
@@ -69,6 +71,13 @@ class InvoiceType extends CommerceBundleEntityBase implements InvoiceTypeInterfa
    * @var \Drupal\commerce_number_pattern\Entity\NumberPatternInterface
    */
   protected $numberPattern;
+
+  /**
+   * UUID of the Invoice type logo file.
+   *
+   * @var string
+   */
+  protected $logo;
 
   /**
    * The invoice type footer text.
@@ -112,6 +121,38 @@ class InvoiceType extends CommerceBundleEntityBase implements InvoiceTypeInterfa
    */
   public function setNumberPatternId($number_pattern) {
     $this->numberPattern = $number_pattern;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getLogoFile() {
+    if ($this->logo) {
+      /** @var \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository */
+      $entity_repository = \Drupal::service('entity.repository');
+      return $entity_repository->loadEntityByUuid('file', $this->logo);
+    }
+
+    return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getLogoUrl() {
+    if ($image = $this->getLogoFile()) {
+      return file_create_url($image->getFileUri());
+    }
+
+    return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setLogo($uuid) {
+    $this->logo = $uuid;
     return $this;
   }
 
@@ -170,6 +211,11 @@ class InvoiceType extends CommerceBundleEntityBase implements InvoiceTypeInterfa
     $workflow_manager = \Drupal::service('plugin.manager.workflow');
     $workflow = $workflow_manager->createInstance($this->getWorkflowId());
     $this->calculatePluginDependencies($workflow);
+
+    // Add the logo entity as dependency if a UUID was specified.
+    if ($this->logo && $file = $this->getLogoFile()) {
+      $this->addDependency($file->getConfigDependencyKey(), $file->getConfigDependencyName());
+    }
 
     return $this;
   }

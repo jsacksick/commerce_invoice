@@ -5,6 +5,9 @@ commerce_invoice.commerce_invoice_type.*:
     numberPattern:
       type: string
       label: 'The number pattern'
+    logo:
+      type: string
+      label: 'The logo file UUID'
     footerText:
       type: text
       label: 'Footer text'

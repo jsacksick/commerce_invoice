@@ -36,6 +36,32 @@ interface InvoiceTypeInterface extends CommerceBundleEntityInterface {
   public function setNumberPatternId($number_pattern);
 
   /**
+   * Gets the logo file entity.
+   *
+   * @return \Drupal\file\FileInterface|null
+   *   The logo file entity or NULL if it does not exist.
+   */
+  public function getLogoFile();
+
+  /**
+   * Gets the logo URL.
+   *
+   * @return string|null
+   *   The logo URL or NULL if it does not exist.
+   */
+  public function getLogoUrl();
+
+  /**
+   * Sets the logo.
+   *
+   * @param string $uuid
+   *   The UUID of the logo file.
+   *
+   * @return $this
+   */
+  public function setLogo($uuid);
+
+  /**
    * Gets the invoice type's footer text.
    **
    * @return string
