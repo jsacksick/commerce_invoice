@@ -80,6 +80,24 @@ interface InvoiceTypeInterface extends CommerceBundleEntityInterface {
   public function setFooterText($footer_text);
 
   /**
+   * Gets the invoice type due days.
+   *
+   * @return int|null
+   *   The invoice type due days.
+   */
+  public function getDueDays();
+
+  /**
+   * Sets the invoice type due days.
+   *
+   * @param int $days
+   *   The due days.
+   *
+   * @return $this
+   */
+  public function setDueDays($days);
+
+  /**
    * Gets the invoice type's payment terms.
    **
    * @return string

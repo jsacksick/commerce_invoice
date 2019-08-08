@@ -18,6 +18,7 @@
  * @ingroup themeable
  */
 #}
+{% set due_date = invoice_entity.getDueDateTime %}
 {% if (logo_url) %}
   <img src="{{ logo_url }}"/>
 {% endif %}
@@ -41,6 +42,12 @@
         <td>{{ 'Date'|t }}</td>
         <td>{{ invoice_entity.getInvoiceDateTime|format_date('custom', 'Y-m-d') }}</td>
       </tr>
+      {% if (due_date) %}
+        <tr>
+          <td>{{ 'Due date'|t }}</td>
+          <td>{{ due_date|format_date('custom', 'Y-m-d') }}</td>
+        </tr>
+      {% endif %}
       </tbody>
     </table>
   </div>

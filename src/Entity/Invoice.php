@@ -6,6 +6,7 @@ use Drupal\commerce\Entity\CommerceContentEntityBase;
 use Drupal\commerce_order\Adjustment;
 use Drupal\commerce_price\Price;
 use Drupal\commerce_store\Entity\StoreInterface;
+use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityMalformedException;
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -502,6 +503,7 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
         throw new EntityMalformedException(sprintf('Required invoice field "%s" is empty.', $field));
       }
     }
+    $invoice_type = InvoiceType::load($this->bundle());
 
     if ($this->isNew() && empty($this->getInvoiceNumber())) {
       /** @var \Drupal\commerce_invoice\InvoiceNumberGeneratorInterface $invoice_number_generator */
@@ -523,6 +525,14 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
 
     if (empty($this->getInvoiceDateTime())) {
       $this->setInvoiceDateTime(\Drupal::time()->getRequestTime());
+    }
+
+    // Calculate the due date if not set and if configured to do so on the
+    // invoice type.
+    if ($this->isNew() && empty($this->getDueDateTime()) && !empty($invoice_type->getDueDays())) {
+      $invoice_date = DrupalDateTime::createFromTimestamp($this->getInvoiceDateTime());
+      $due_date = $invoice_date->modify("+{$invoice_type->getDueDays()} days");
+      $this->setDueDateTime($due_date->getTimestamp());
     }
 
     if ($this->getState()->getId() == 'pending') {

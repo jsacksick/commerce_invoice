@@ -50,6 +50,7 @@ use Drupal\paragraphs\ParagraphsBehaviorCollection;
  *     "numberPattern",
  *     "logo",
  *     "footerText",
+ *     "dueDays",
  *     "paymentTerms",
  *     "workflow",
  *     "traits",
@@ -85,6 +86,13 @@ class InvoiceType extends CommerceBundleEntityBase implements InvoiceTypeInterfa
    * @var string
    */
   protected $footerText;
+
+  /**
+   * The invoice type due days.
+   *
+   * @var int
+   */
+  protected $dueDays;
 
   /**
    * The invoice type payment terms.
@@ -168,6 +176,21 @@ class InvoiceType extends CommerceBundleEntityBase implements InvoiceTypeInterfa
    */
   public function setFooterText($footer_text) {
     $this->footerText = $footer_text;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDueDays() {
+    return $this->dueDays;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setDueDays($days) {
+    $this->dueDays = $days;
     return $this;
   }
 

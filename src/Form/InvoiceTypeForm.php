@@ -122,7 +122,21 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
       '#theme' => 'token_tree_link',
       '#token_types' => $token_types,
     ];
-    $form['paymentTerms'] = [
+    $form['payment-terms'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Payment terms'),
+      '#tree' => FALSE,
+      '#open' => TRUE,
+    ];
+    $form['payment-terms']['dueDays'] = [
+      '#type' => 'number',
+      '#size' => 3,
+      '#description' => $this->t('used to determine the invoice\'s due date.'),
+      '#field_suffix' => $this->t('days'),
+      '#title' => $this->t('Due date'),
+      '#default_value' => $invoice_type->getDueDays(),
+    ];
+    $form['payment-terms']['paymentTerms'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Payment terms'),
       '#default_value' => $invoice_type->getPaymentTerms(),

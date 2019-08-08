@@ -11,6 +11,9 @@ commerce_invoice.commerce_invoice_type.*:
     footerText:
       type: text
       label: 'Footer text'
+    dueDays:
+      type: integer
+      label: 'Due days'
     paymentTerms:
       type: text
       label: 'Payment terms'
