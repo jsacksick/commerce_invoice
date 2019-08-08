@@ -63,6 +63,7 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
     $order_type = OrderType::load($first_order->bundle());
     $values += [
       'type' => $order_type->getThirdPartySetting('commerce_invoice', 'invoice_type', 'default'),
+      'state' => 'pending',
       'store_id' => $store->id(),
     ];
     /** @var \Drupal\commerce_invoice\Entity\InvoiceInterface $invoice */

@@ -3,6 +3,8 @@ invoice_default:
   group: commerce_invoice
   label: 'Default'
   states:
+    draft:
+      label: Draft
     pending:
       label: Pending
     paid:
