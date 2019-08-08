@@ -10,7 +10,7 @@ use Drupal\Tests\commerce_invoice\Kernel\InvoiceKernelTestBase;
  *
  * @coversDefaultClass \Drupal\commerce_invoice\Entity\InvoiceType
  *
- * @group commerce_recurring
+ * @group commerce_invoice
  */
 class InvoiceTypeTest extends InvoiceKernelTestBase {
 

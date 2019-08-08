@@ -127,6 +127,7 @@ class InvoiceAdminTest extends InvoiceBrowserTestBase {
     $this->getSession()->reload();
     $this->assertSession()->pageTextNotContains('There are no invoices yet.');
     $this->assertSession()->pageTextContains($invoice->label());
+    $this->assertSession()->pageTextContains('Download');
 
     // Ensure the listing works without the view.
     View::load('commerce_invoices')->delete();

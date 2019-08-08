@@ -8,6 +8,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -98,6 +99,25 @@ class InvoiceListBuilder extends EntityListBuilder {
     ];
 
     return $row + parent::buildRow($entity);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getDefaultOperations(EntityInterface $entity) {
+    $operations = parent::getDefaultOperations($entity);
+
+    $operations['download'] = [
+      'title' => t('Download'),
+      'url' => Url::fromRoute('entity_print.view', [
+        'export_type' => 'pdf',
+        'entity_id' => $entity->id(),
+        'entity_type' => 'commerce_invoice',
+      ]),
+      'weight' => 50,
+    ];
+
+    return $operations;
   }
 
 }
