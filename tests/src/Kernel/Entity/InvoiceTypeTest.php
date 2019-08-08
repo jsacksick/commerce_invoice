@@ -57,6 +57,8 @@ class InvoiceTypeTest extends InvoiceKernelTestBase {
    * @covers ::setLogo
    * @covers ::getFooterText
    * @covers ::setFooterText
+   * @covers ::getDueDays
+   * @covers ::setDueDays
    * @covers ::getPaymentTerms
    * @covers ::setPaymentTerms
    */
@@ -66,6 +68,7 @@ class InvoiceTypeTest extends InvoiceKernelTestBase {
       'paymentTerms' => $this->randomString(),
       'numberPattern' => 'invoice_infinite',
       'logo' => $this->file->uuid(),
+      'dueDays' => 10,
     ];
     $invoice_type = $this->createInvoiceType('test_id', 'Test label', $values);
     $this->assertEquals('test_id', $invoice_type->id());
@@ -82,6 +85,10 @@ class InvoiceTypeTest extends InvoiceKernelTestBase {
     $this->assertEquals($values['footerText'], $invoice_type->getFooterText());
     $invoice_type->setFooterText('Footer text (modified)');
     $this->assertEquals('Footer text (modified)', $invoice_type->getFooterText());
+
+    $this->assertEquals($values['dueDays'], $invoice_type->getDueDays());
+    $invoice_type->setDueDays(15);
+    $this->assertEquals(15, $invoice_type->getDueDays());
 
     $this->assertEquals($values['paymentTerms'], $invoice_type->getPaymentTerms());
     $invoice_type->setPaymentTerms('Payment terms (modified)');
