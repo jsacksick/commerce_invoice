@@ -2,8 +2,7 @@
 
 namespace Drupal\commerce_invoice_test\EventSubscriber;
 
-use Drupal\commerce_invoice\Event\InvoiceEvent;
-use Drupal\commerce_invoice\Event\InvoiceEvents;
+use Drupal\state_machine\Event\WorkflowTransitionEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class InvoicePaidSubscriber implements EventSubscriberInterface {
@@ -13,18 +12,19 @@ class InvoicePaidSubscriber implements EventSubscriberInterface {
    */
   public static function getSubscribedEvents() {
     return [
-      InvoiceEvents::INVOICE_PAID => 'onPaid',
+      'commerce_invoice.pay.pre_transition' => 'onPaid',
     ];
   }
 
   /**
-   * Increments an invoice flag each time the paid event gets dispatched.
+   * Increments an invoice flag each time the paid transition is applied.
    *
-   * @param \Drupal\commerce_invoice\Event\InvoiceEvent $event
-   *   The event.
+   * @param \Drupal\state_machine\Event\WorkflowTransitionEvent $event
+   *   The transition event.
    */
-  public function onPaid(InvoiceEvent $event) {
-    $invoice = $event->getInvoice();
+  public function onPaid(WorkflowTransitionEvent $event) {
+    /** @var \Drupal\commerce_invoice\Entity\InvoiceInterface $invoice */
+    $invoice = $event->getEntity();
     $flag = $invoice->getData('invoice_test_called', 0);
     $flag++;
     $invoice->setData('invoice_test_called', $flag);

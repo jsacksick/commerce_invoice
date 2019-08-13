@@ -230,7 +230,7 @@ class InvoiceTest extends InvoiceKernelTestBase {
     $this->assertEquals(new Price('-10.00', 'USD'), $invoice->getBalance());
     $this->assertTrue($invoice->isPaid());
 
-    $this->assertEquals('pending', $invoice->getState()->getId());
+    $this->assertEquals('draft', $invoice->getState()->getId());
 
     $this->assertEquals('default', $invoice->getData('test', 'default'));
     $invoice->setData('test', 'value');
@@ -328,9 +328,9 @@ class InvoiceTest extends InvoiceKernelTestBase {
   }
 
   /**
-   * Tests that the paid event is dispatched when the balance reaches zero.
+   * Tests that the paid transition is applied when the balance reaches zero.
    */
-  public function testPaidEvent() {
+  public function testPaidTransition() {
     /** @var \Drupal\commerce_invoice\Entity\InvoiceItemInterface $invoice_item */
     $invoice_item = InvoiceItem::create([
       'type' => 'commerce_product_variation',
@@ -346,10 +346,12 @@ class InvoiceTest extends InvoiceKernelTestBase {
     ]);
     $invoice->save();
     $this->assertNull($invoice->getData('invoice_test_called'));
+    $this->assertEquals('draft', $invoice->getState()->getId());
 
     $invoice->setTotalPaid(new Price('20.00', 'USD'));
     $invoice->save();
     $this->assertEquals(1, $invoice->getData('invoice_test_called'));
+    $this->assertEquals('paid', $invoice->getState()->getId());
 
     // Confirm that the event is not dispatched the second time the balance
     // reaches zero.

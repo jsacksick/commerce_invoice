@@ -18,7 +18,7 @@ invoice_default:
   transitions:
     pay:
       label: 'Pay invoice'
-      from: [pending]
+      from: [draft, pending]
       to: paid
     refund:
       label: 'Refund invoice'

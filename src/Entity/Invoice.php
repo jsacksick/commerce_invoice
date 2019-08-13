@@ -534,13 +534,6 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
       $due_date = $invoice_date->modify("+{$invoice_type->getDueDays()} days");
       $this->setDueDateTime($due_date->getTimestamp());
     }
-
-    if (in_array($this->getState()->getId(), ['draft', 'pending'])) {
-      // Initialize the flag for InvoiceStorage::doInvoicePreSave().
-      if ($this->getData('paid_event_dispatched') === NULL) {
-        $this->setData('paid_event_dispatched', FALSE);
-      }
-    }
   }
 
   /**

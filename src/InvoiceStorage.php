@@ -29,7 +29,7 @@ class InvoiceStorage extends CommerceContentEntityStorage {
    *
    * This includes:
    * - Recalculating the total price.
-   * - Dispatching the "invoice paid" event.
+   * - Applying the "paid" transition.
    *
    * @param \Drupal\commerce_invoice\Entity\InvoiceInterface $invoice
    *   The invoice.
@@ -37,17 +37,10 @@ class InvoiceStorage extends CommerceContentEntityStorage {
   protected function doInvoicePresave(InvoiceInterface $invoice) {
     $invoice->recalculateTotalPrice();
 
-    // Notify other modules if the invoice has been fully paid.
+    // Apply the "paid" transition when an invoice is paid.
     $original_paid = isset($invoice->original) ? $invoice->original->isPaid() : FALSE;
     if ($invoice->isPaid() && !$original_paid) {
-      // Invoice::preSave() initializes the 'paid_event_dispatched' flag to
-      // FALSE.
-      // Skip dispatch if it already happened once (flag is TRUE).
-      if ($invoice->getData('paid_event_dispatched') === FALSE) {
-        $event = new InvoiceEvent($invoice);
-        $this->eventDispatcher->dispatch(InvoiceEvents::INVOICE_PAID, $event);
-        $invoice->setData('paid_event_dispatched', TRUE);
-      }
+      $invoice->getState()->applyTransitionById('pay');
     }
   }
 
