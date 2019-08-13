@@ -144,7 +144,7 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
       '#element_validate' => ['token_element_validate'],
       '#token_types' => $token_types,
     ];
-    $form['payment_terms_token_help'] = [
+    $form['payment-terms']['payment_terms_token_help'] = [
       '#theme' => 'token_tree_link',
       '#token_types' => $token_types,
     ];
