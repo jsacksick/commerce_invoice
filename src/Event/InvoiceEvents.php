@@ -5,22 +5,6 @@ namespace Drupal\commerce_invoice\Event;
 final class InvoiceEvents {
 
   /**
-   * Name of the event fired after the invoice has been fully paid.
-   *
-   * Guaranteed to only fire once, when the invoice balance reaches zero.
-   * Subsequent changes to the balance won't redispatch the event (e.g. in case
-   * of a refund followed by an additional payment).
-   *
-   * Fired before the invoice is saved.
-   *
-   * @Event
-   *
-   * @see \Drupal\commerce_invoice\Entity\InvoiceInterface::getBalance()
-   * @see \Drupal\commerce_invoice\Event\InvoiceEvent
-   */
-  const INVOICE_PAID = 'commerce_invoice.invoice.paid';
-
-  /**
    * Name of the event fired after loading an invoice.
    *
    * @Event
