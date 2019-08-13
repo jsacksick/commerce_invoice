@@ -128,6 +128,9 @@ class InvoiceTest extends InvoiceKernelTestBase {
     ]);
     $invoice->save();
 
+    // Assert that saving a draft invoice didn't automatically generate an
+    // invoice number.
+    $this->assertNull($invoice->getInvoiceNumber());
     $invoice->setInvoiceNumber(7);
     $this->assertEquals(7, $invoice->getInvoiceNumber());
 

@@ -505,7 +505,8 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
     }
     $invoice_type = InvoiceType::load($this->bundle());
 
-    if ($this->isNew() && empty($this->getInvoiceNumber())) {
+    // Skip generating an invoice number for draft invoices.
+    if ($this->getState()->getId() != 'draft' && empty($this->getInvoiceNumber())) {
       /** @var \Drupal\commerce_invoice\InvoiceNumberGeneratorInterface $invoice_number_generator */
       $invoice_number_generator = \Drupal::service('commerce_invoice.invoice_number_generator');
       $this->setInvoiceNumber($invoice_number_generator->generateInvoiceNumber($this));
