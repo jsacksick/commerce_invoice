@@ -217,7 +217,7 @@ display:
           click_sort_column: value
           type: timestamp
           settings:
-            date_format: short
+            date_format: html_date
             custom_date_format: ''
             timezone: ''
           group_column: value

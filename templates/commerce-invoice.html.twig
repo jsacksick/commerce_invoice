@@ -40,12 +40,12 @@
       </tr>
       <tr>
         <td>{{ 'Date'|t }}</td>
-        <td>{{ invoice_entity.getInvoiceDateTime|format_date('custom', 'Y-m-d') }}</td>
+        <td>{{ invoice_entity.getInvoiceDateTime|format_date('html_date') }}</td>
       </tr>
       {% if (due_date) %}
         <tr>
           <td>{{ 'Due date'|t }}</td>
-          <td>{{ due_date|format_date('custom', 'Y-m-d') }}</td>
+          <td>{{ due_date|format_date('html_date') }}</td>
         </tr>
       {% endif %}
       </tbody>
