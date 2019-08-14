@@ -33,6 +33,7 @@ class InvoiceTypeTest extends InvoiceBrowserTestBase {
       'label' => 'Foo',
       'footerText' => $this->randomString(),
       'paymentTerms' => 'payment terms!',
+      'dueDays' => 20,
     ];
     $this->submitForm($edit, t('Save'));
     $this->assertSession()->pageTextContains('Saved the Foo invoice type.');
@@ -40,6 +41,7 @@ class InvoiceTypeTest extends InvoiceBrowserTestBase {
     $invoice_type = InvoiceType::load('foo');
     $this->assertEquals($edit['footerText'], $invoice_type->getFooterText());
     $this->assertEquals($edit['paymentTerms'], $invoice_type->getPaymentTerms());
+    $this->assertEquals($edit['dueDays'], $invoice_type->getDueDays());
     $this->assertNotEmpty($invoice_type);
   }
 
@@ -52,6 +54,7 @@ class InvoiceTypeTest extends InvoiceBrowserTestBase {
       'label' => 'Default!',
       'footerText' => $this->randomString(),
       'paymentTerms' => $this->randomString(),
+      'dueDays' => 15,
     ];
     $this->submitForm($edit, 'Save');
     $this->assertSession()->pageTextContains('Saved the Default! invoice type.');
@@ -61,6 +64,7 @@ class InvoiceTypeTest extends InvoiceBrowserTestBase {
     $this->assertEquals($edit['label'], $invoice_type->label());
     $this->assertEquals($edit['footerText'], $invoice_type->getFooterText());
     $this->assertEquals($edit['paymentTerms'], $invoice_type->getPaymentTerms());
+    $this->assertEquals($edit['dueDays'], $invoice_type->getDueDays());
   }
 
   /**
@@ -72,6 +76,7 @@ class InvoiceTypeTest extends InvoiceBrowserTestBase {
     $edit = [
       'label' => $this->randomString(),
       'id' => $this->randomMachineName(),
+      'paymentTerms' => $this->randomString()
     ];
     $this->submitForm($edit, t('Save'));
     $this->assertSession()->pageTextContains(t('Saved the @name invoice type.', ['@name' => $edit['label']]));
@@ -85,6 +90,7 @@ class InvoiceTypeTest extends InvoiceBrowserTestBase {
     $invoice_type = InvoiceType::load($edit['id']);
     $this->assertNotEmpty($invoice_type);
     $this->assertEquals($edit['label'], $invoice_type->label());
+    $this->assertEquals($edit['paymentTerms'], $invoice_type->getPaymentTerms());
   }
 
   /**
