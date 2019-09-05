@@ -49,16 +49,21 @@ class OrderPaidSubscriber implements EventSubscriberInterface {
       ->accessCheck(FALSE)
       ->execute();
 
-    // No pending invoice reference the order being paid, aborting.
+    // No pending invoice references the order being paid, aborting.
     if (!$invoice_ids) {
       return;
     }
-    /** @var \Drupal\commerce_invoice\Entity\InvoiceInterface $invoice */
-    $invoice = $this->invoiceStorage->load(reset($invoice_ids));
-    $total_paid = $invoice->getTotalPaid();
-    $total_paid = $total_paid ? $total_paid->add($order->getTotalPaid()) : $order->getTotalPaid();
-    $invoice->setTotalPaid($total_paid);
-    $invoice->save();
+    /** @var \Drupal\commerce_invoice\Entity\InvoiceInterface[] $invoices */
+    $invoices = $this->invoiceStorage->load(reset($invoice_ids));
+    foreach ($invoices as $invoice) {
+      if ($invoice->isPaid()) {
+        continue;
+      }
+      $total_paid = $invoice->getTotalPaid();
+      $total_paid = $total_paid ? $total_paid->add($order->getTotalPaid()) : $order->getTotalPaid();
+      $invoice->setTotalPaid($total_paid);
+      $invoice->save();
+    }
   }
 
 }
