@@ -312,14 +312,12 @@ class InvoiceItem extends CommerceContentEntityBase implements InvoiceItemInterf
    */
   public function populateFromOrderItem(OrderItemInterface $order_item) {
     $purchased_entity = $order_item->getPurchasedEntity();
-    // In case the purchased entity is a product variation, use its title,
-    // otherwise fallback to the order item title.
-    if ($purchased_entity instanceof ProductVariationInterface) {
+    if ($purchased_entity) {
       $langcode = $this->language()->getId();
       if ($purchased_entity->hasTranslation($langcode)) {
         $purchased_entity = $purchased_entity->getTranslation($langcode);
       }
-      $title = $purchased_entity->getTitle();
+      $title = $purchased_entity->getOrderItemTitle();
     }
     else {
       $title = $order_item->getTitle();
