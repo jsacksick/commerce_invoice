@@ -378,6 +378,7 @@ class InvoiceItem extends CommerceContentEntityBase implements InvoiceItemInterf
         'type' => 'text_default',
         'weight' => 0,
       ])
+      ->setTranslatable(TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['quantity'] = BaseFieldDefinition::create('decimal')
