@@ -34,6 +34,7 @@ use Drupal\user\UserInterface;
  *   handlers = {
  *     "event" = "Drupal\commerce_invoice\Event\InvoiceEvent",
  *     "storage" = "Drupal\commerce_invoice\InvoiceStorage",
+ *     "view_builder" = "Drupal\commerce_invoice\InvoiceViewBuilder",
  *     "list_builder" = "Drupal\commerce_invoice\InvoiceListBuilder",
  *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
  *     "views_data" = "Drupal\commerce\CommerceEntityViewsData",
@@ -47,9 +48,11 @@ use Drupal\user\UserInterface;
  *     "route_provider" = {
  *       "default" = "Drupal\entity\Routing\AdminHtmlRouteProvider",
  *     },
+ *     "translation" = "Drupal\content_translation\ContentTranslationHandler"
  *   },
  *   translatable = TRUE,
  *   base_table = "commerce_invoice",
+ *   data_table = "commerce_invoice_field_data",
  *   admin_permission = "administer commerce_invoice",
  *   permission_granularity = "bundle",
  *   entity_keys = {
@@ -66,7 +69,7 @@ use Drupal\user\UserInterface;
  *     "collection" = "/admin/commerce/invoices",
  *   },
  *   bundle_entity_type = "commerce_invoice_type",
- *   field_ui_base_route = "entity.commerce_invoice_type.edit_form"
+ *   field_ui_base_route = "entity.commerce_invoice_type.edit_form",
  * )
  */
 class Invoice extends CommerceContentEntityBase implements InvoiceInterface {

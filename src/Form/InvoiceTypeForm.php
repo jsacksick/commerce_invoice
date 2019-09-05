@@ -9,6 +9,7 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\entity\Form\EntityDuplicateFormTrait;
+use Drupal\language\Entity\ContentLanguageSettings;
 use Drupal\state_machine\WorkflowManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -58,7 +59,6 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
     $invoice_type = $this->entity;
     $workflows = $this->workflowManager->getGroupedLabels('commerce_invoice');
     $wrapper_id = Html::getUniqueId('invoice-type-form');
-    $form['#tree'] = TRUE;
     $form['#prefix'] = '<div id="' . $wrapper_id . '">';
     $form['#suffix'] = '</div>';
 
@@ -79,6 +79,15 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
       '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
       '#disabled' => !$invoice_type->isNew(),
     ];
+    $form['workflow'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Workflow'),
+      '#options' => $workflows,
+      '#default_value' => $invoice_type->getWorkflowId(),
+      '#description' => $this->t('Used by all invoices of this type.'),
+    ];
+
+    // Load number patterns.
     $storage = $this->entityTypeManager->getStorage('commerce_number_pattern');
     $query = $storage->getQuery();
     $query->condition('type', 'commerce_invoice');
@@ -148,14 +157,23 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
       '#theme' => 'token_tree_link',
       '#token_types' => $token_types,
     ];
-    $form['workflow'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Workflow'),
-      '#options' => $workflows,
-      '#default_value' => $invoice_type->getWorkflowId(),
-      '#description' => $this->t('Used by all invoices of this type.'),
-    ];
     $form = $this->buildTraitForm($form, $form_state);
+
+    if ($this->moduleHandler->moduleExists('language')) {
+      $form['language'] = [
+        '#type' => 'details',
+        '#title' => $this->t('Language settings'),
+      ];
+      $form['language']['language_configuration'] = [
+        '#type' => 'language_configuration',
+        '#entity_information' => [
+          'entity_type' => 'commerce_invoice',
+          'bundle' => $invoice_type->id(),
+        ],
+        '#default_value' => ContentLanguageSettings::loadByEntityTypeBundle('commerce_invoice', $invoice_type->id()),
+      ];
+      $form['#submit'][] = 'language_configuration_element_submit';
+    }
 
     return $form;
   }

@@ -10,6 +10,6 @@ type: commerce_invoice
 plugin: infinite
 configuration:
   pattern: '{sequence}'
-  perStoreSequence: true
-  initialSequence: 1
+  per_store_sequence: true
+  initial_sequence: 1
   padding: 0
