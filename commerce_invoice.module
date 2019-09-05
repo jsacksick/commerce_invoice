@@ -171,8 +171,8 @@ function template_preprocess_commerce_invoice(array &$variables) {
  * Implements hook_views_data_alter().
  */
 function commerce_invoice_views_data_alter(array &$data) {
-  $data['commerce_invoice']['store_id']['field']['id'] = 'commerce_store';
-  $data['commerce_invoice']['state']['filter']['id'] = 'state_machine_state';
+  $data['commerce_invoice_field_data']['store_id']['field']['id'] = 'commerce_store';
+  $data['commerce_invoice_field_data']['state']['filter']['id'] = 'state_machine_state';
 }
 
 /**

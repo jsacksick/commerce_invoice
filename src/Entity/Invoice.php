@@ -46,7 +46,7 @@ use Drupal\user\UserInterface;
  *       "default" = "Drupal\entity\Menu\DefaultEntityLocalTaskProvider",
  *     },
  *     "route_provider" = {
- *       "default" = "Drupal\entity\Routing\AdminHtmlRouteProvider",
+ *       "default" = "Drupal\commerce_invoice\InvoiceRouteProvider",
  *     },
  *     "translation" = "Drupal\content_translation\ContentTranslationHandler"
  *   },
@@ -66,6 +66,7 @@ use Drupal\user\UserInterface;
  *   links = {
  *     "delete-form" = "/admin/commerce/invoices/{commerce_invoice}/delete",
  *     "generate" = "/admin/commerce/invoices/generate/{commerce_order}",
+ *     "order-collection" = "/admin/commerce/orders/{commerce_order}/invoices",
  *     "collection" = "/admin/commerce/invoices",
  *   },
  *   bundle_entity_type = "commerce_invoice_type",

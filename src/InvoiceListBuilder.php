@@ -113,7 +113,7 @@ class InvoiceListBuilder extends EntityListBuilder {
         'export_type' => 'pdf',
         'entity_id' => $entity->id(),
         'entity_type' => 'commerce_invoice',
-      ]),
+      ], ['language' => $entity->language()]),
       'weight' => 50,
     ];
 

@@ -1,4 +1,5 @@
-entity.commerce_invoice.collection:
-  route_name: entity.commerce_invoice.collection
-  base_route: entity.commerce_invoice.collection
-  title: 'Orders'
+entity.commerce_invoice.order_collection:
+  route_name: entity.commerce_invoice.order_collection
+  base_route: entity.commerce_order.canonical
+  title: Invoices
+  weight: 15
