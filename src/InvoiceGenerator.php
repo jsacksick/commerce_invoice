@@ -71,6 +71,8 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
     $billing_profile = $profile->createDuplicate();
     $billing_profile->save();
     $invoice->setBillingProfile($billing_profile);
+    // Get the invoice language so we can set it on invoice items.
+    $langcode = $invoice->language()->getId();
 
     $total_paid = NULL;
     /** @var \Drupal\commerce_order\Entity\OrderInterface[] $orders */
@@ -83,7 +85,10 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
         $order_item_type = OrderItemType::load($order_item->bundle());
         $invoice_item_type = $order_item_type->getPurchasableEntityTypeId() ?: 'default';
         /** @var \Drupal\commerce_invoice\Entity\InvoiceItemInterface $invoice_item */
-        $invoice_item = $invoice_item_storage->create(['type' => $invoice_item_type]);
+        $invoice_item = $invoice_item_storage->create([
+          'langcode' => $langcode,
+          'type' => $invoice_item_type
+        ]);
         $invoice_item->populateFromOrderItem($order_item);
         $invoice_item->save();
         $invoice->addItem($invoice_item);

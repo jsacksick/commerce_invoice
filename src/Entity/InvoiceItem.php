@@ -6,6 +6,7 @@ use Drupal\commerce\Entity\CommerceContentEntityBase;
 use Drupal\commerce_order\Adjustment;
 use Drupal\commerce_order\Entity\OrderItemInterface;
 use Drupal\commerce_price\Price;
+use Drupal\commerce_product\Entity\ProductVariationInterface;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -31,11 +32,14 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *     },
  *     "views_data" = "Drupal\commerce\CommerceEntityViewsData",
  *   },
+ *   translatable = TRUE,
  *   base_table = "commerce_invoice_item",
+ *   data_table = "commerce_invoice_item_field_data",
  *   admin_permission = "administer commerce_invoice",
  *   entity_keys = {
  *     "id" = "invoice_item_id",
  *     "bundle" = "type",
+ *     "langcode" = "langcode",
  *     "uuid" = "uuid",
  *     "label" = "title",
  *   },
@@ -307,9 +311,22 @@ class InvoiceItem extends CommerceContentEntityBase implements InvoiceItemInterf
    * {@inheritdoc}
    */
   public function populateFromOrderItem(OrderItemInterface $order_item) {
+    $purchased_entity = $order_item->getPurchasedEntity();
+    // In case the purchased entity is a product variation, use its title,
+    // otherwise fallback to the order item title.
+    if ($purchased_entity instanceof ProductVariationInterface) {
+      $langcode = $this->language()->getId();
+      if ($purchased_entity->hasTranslation($langcode)) {
+        $purchased_entity = $purchased_entity->getTranslation($langcode);
+      }
+      $title = $purchased_entity->getTitle();
+    }
+    else {
+      $title = $order_item->getTitle();
+    }
     $this->set('adjustments', $order_item->getAdjustments());
     $this->set('quantity', $order_item->getQuantity());
-    $this->set('title', $order_item->getTitle());
+    $this->set('title', $title);
     $this->set('unit_price', $order_item->getUnitPrice());
     $this->order_item_id = $order_item->id();
   }
@@ -353,6 +370,7 @@ class InvoiceItem extends CommerceContentEntityBase implements InvoiceItemInterf
         'default_value' => '',
         'max_length' => 512,
       ])
+      ->setTranslatable(TRUE)
       ->setRequired(TRUE);
 
     $fields['description'] = BaseFieldDefinition::create('text_long')
