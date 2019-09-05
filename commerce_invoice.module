@@ -179,12 +179,12 @@ function commerce_invoice_views_data_alter(array &$data) {
  * Implements hook_entity_operation().
  */
 function commerce_invoice_entity_operation(EntityInterface $entity) {
-  // Only show the "Download invoice" operation link for orders.
+  // Only show the "Invoices" operation link for orders.
   if ($entity->getEntityTypeId() !== 'commerce_order') {
     return;
   }
   /** @var \Drupal\commerce_order\Entity\OrderInterface $entity */
-  // Do not show the "download invoice" operation for draft orders.
+  // Do not show the "Invoices" operation for draft orders.
   if ($entity->getState()->getId() == 'draft') {
     return;
   }
