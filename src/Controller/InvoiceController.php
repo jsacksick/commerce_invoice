@@ -7,8 +7,10 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -19,6 +21,7 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class InvoiceController implements ContainerInjectionInterface {
 
+  use StringTranslationTrait;
   use DependencySerializationTrait;
 
   /**
@@ -36,16 +39,26 @@ class InvoiceController implements ContainerInjectionInterface {
   protected $invoiceGenerator;
 
   /**
+   * The messenger.
+   *
+   * @var \Drupal\Core\Messenger\MessengerInterface
+   */
+  protected $messenger;
+
+  /**
    * Constructs a new InvoiceController object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    * @param \Drupal\commerce_invoice\InvoiceGeneratorInterface $invoice_generator
    *   The invoice generator.
+   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
+   *   The messenger.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, InvoiceGeneratorInterface $invoice_generator) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, InvoiceGeneratorInterface $invoice_generator, MessengerInterface $messenger) {
     $this->entityTypeManager = $entity_type_manager;
     $this->invoiceGenerator = $invoice_generator;
+    $this->messenger = $messenger;
   }
 
   /**
@@ -54,12 +67,13 @@ class InvoiceController implements ContainerInjectionInterface {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('entity_type.manager'),
-      $container->get('commerce_invoice.invoice_generator')
+      $container->get('commerce_invoice.invoice_generator'),
+      $container->get('messenger')
     );
   }
 
   /**
-   * Generate an invoice an redirect to the entity print download route.
+   * Generate an invoice and redirect the order invoices tab.
    *
    * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
    *   The route match.
@@ -72,30 +86,16 @@ class InvoiceController implements ContainerInjectionInterface {
   public function generate(RouteMatchInterface $route_match, Request $request) {
     /** @var \Drupal\commerce_order\Entity\OrderInterface $order */
     $order = $route_match->getParameter('commerce_order');
-    /** @var \Drupal\commerce_invoice\Entity\ $invoice_storage */
-    $invoice_storage = $this->entityTypeManager->getStorage('commerce_invoice');
-    // Check if the given order is already referenced by an existing invoice.
-    $invoice_ids = $invoice_storage->getQuery()
-      ->condition('orders', [$order->id()], 'IN')
-      ->accessCheck(FALSE)
-      ->execute();
-    if ($invoice_ids) {
-      $invoice_id = reset($invoice_ids);
-    }
-    else {
-      $invoice = $this->invoiceGenerator->generate([$order], $order->getStore(), $order->getBillingProfile(), ['uid' => $order->getCustomerId()]);
-      $invoice_id = $invoice->id();
-    }
-    $url = Url::fromRoute('entity_print.view', [
-      'export_type' => 'pdf',
-      'entity_id' => $invoice_id,
-      'entity_type' => 'commerce_invoice',
+    $invoice = $this->invoiceGenerator->generate([$order], $order->getStore(), $order->getBillingProfile(), ['uid' => $order->getCustomerId()]);
+    // We can't use the invoice link template here since the same invoice could
+    // potentially reference multiple orders.
+    $redirect_url = Url::fromRoute('entity.commerce_invoice.order_collection', [
+      'commerce_order' => $order->id(),
     ]);
-    // We have to remove the destination, otherwise the redirect doesn't happen.
-    if ($request->query->has('destination')) {
-      $request->query->remove('destination');
+    if ($invoice) {
+      $this->messenger->addMessage($this->t('Invoice %label successfully generated.', ['%label' => $invoice->label()]));
     }
-    return new RedirectResponse($url->toString());
+    return new RedirectResponse($redirect_url->toString());
   }
 
   /**
@@ -114,14 +114,25 @@ class InvoiceController implements ContainerInjectionInterface {
     $order = $route_match->getParameter('commerce_order');
     if ($order->getState()->getId() == 'canceled' ||
       $order->hasField('cart') && $order->get('cart')->value) {
-      return AccessResult::forbidden()->addCacheableDependency($order);
+      return AccessResult::forbidden()->mergeCacheMaxAge(0);
+    }
+    /** @var \Drupal\commerce_invoice\Entity\ $invoice_storage */
+    $invoice_storage = $this->entityTypeManager->getStorage('commerce_invoice');
+    $invoice_ids = $invoice_storage->getQuery()
+      ->condition('orders', [$order->id()], 'IN')
+      ->accessCheck(FALSE)
+      ->execute();
+
+    // If an invoice already references this order, forbid access.
+    if ($invoice_ids) {
+      return AccessResult::forbidden()->mergeCacheMaxAge(0);
     }
 
     // The invoice generator service needs a store and a billing profile.
     $order_requirements = !empty($order->getStoreId()) && !empty($order->getBillingProfile());
     $access = AccessResult::allowedIf($order_requirements)
       ->andIf(AccessResult::allowedIfHasPermission($account, 'administer commerce_invoice'))
-      ->addCacheableDependency($order);
+      ->mergeCacheMaxAge(0);
 
     return $access;
   }

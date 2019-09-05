@@ -192,9 +192,9 @@ function commerce_invoice_entity_operation(EntityInterface $entity) {
   if (!\Drupal::currentUser()->hasPermission('administer commerce_invoice')) {
     return;
   }
-  $operations['invoice'] = [
-    'title' => t('Download invoice'),
-    'url' => Url::fromRoute('entity.commerce_invoice.generate', [
+  $operations['invoices'] = [
+    'title' => t('Invoices'),
+    'url' => Url::fromRoute('entity.commerce_invoice.order_collection', [
       'commerce_order' => $entity->id(),
     ]),
     'weight' => 50,
