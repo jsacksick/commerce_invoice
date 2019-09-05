@@ -18,6 +18,9 @@ class InvoiceRouteProvider extends AdminHtmlRouteProvider {
     $collection = parent::getRoutes($entity_type);
     $entity_type_id = $entity_type->id();
 
+    if ($invoice_payment_route = $this->getInvoicePaymentFormRoute($entity_type)) {
+      $collection->add("entity.{$entity_type_id}.payment_form", $invoice_payment_route);
+    }
     if ($order_collection_route = $this->getOrderCollectionRoute($entity_type)) {
       $collection->add("entity.{$entity_type_id}.order_collection", $order_collection_route);
     }
@@ -26,7 +29,45 @@ class InvoiceRouteProvider extends AdminHtmlRouteProvider {
   }
 
   /**
-   * {@inheritdoc}
+   * Gets the invoice payment-form route.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+   *   The entity type.
+   *
+   * @return \Symfony\Component\Routing\Route|null
+   *   The generated route, if available.
+   */
+  protected function getInvoicePaymentFormRoute(EntityTypeInterface $entity_type) {
+    if ($entity_type->hasLinkTemplate('payment-form')) {
+      $route = new Route($entity_type->getLinkTemplate('payment-form'));
+      $entity_type_id = $entity_type->id();
+      $route
+        ->setDefaults([
+          '_form' => '\Drupal\commerce_invoice\Form\InvoicePaymentForm',
+        ])
+        ->setRequirement('_entity_access', "{$entity_type_id}.update")
+        ->setOption('parameters', [
+          $entity_type_id => ['type' => 'entity:' . $entity_type_id],
+        ]);
+
+      // Entity types with serial IDs can specify this in their route
+      // requirements, improving the matching process.
+      if ($this->getEntityTypeIdKeyType($entity_type) === 'integer') {
+        $route->setRequirement($entity_type_id, '\d+');
+      }
+
+      return $route;
+    }
+  }
+
+  /**
+   * Gets the order-collection route.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+   *   The entity type.
+   *
+   * @return \Symfony\Component\Routing\Route|null
+   *   The generated route, if available.
    */
   protected function getOrderCollectionRoute(EntityTypeInterface $entity_type) {
     if ($entity_type->hasLinkTemplate('order-collection') && ($admin_permission = $entity_type->getAdminPermission())) {

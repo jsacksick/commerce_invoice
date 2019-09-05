@@ -114,8 +114,15 @@ class InvoiceListBuilder extends EntityListBuilder {
         'entity_id' => $entity->id(),
         'entity_type' => 'commerce_invoice',
       ], ['language' => $entity->language()]),
-      'weight' => 50,
     ];
+
+    if ($entity->access('update') && !$entity->isPaid()) {
+      $operations['pay'] = [
+        'title' => t('Pay'),
+        'url' => $entity->toUrl('payment-form'),
+        'weight' => 50,
+      ];
+    }
 
     return $operations;
   }
