@@ -106,6 +106,25 @@ class InvoiceAdminTest extends InvoiceBrowserTestBase {
   }
 
   /**
+   * Tests access to the order invoices tab.
+   */
+  public function testOrderInvoicesAccess() {
+    $user = $this->drupalCreateUser();
+    $this->drupalLogin($user);
+    $this->drupalGet($this->orderInvoicesUrl);
+    $this->assertSession()->pageTextContains('Access denied');
+    $this->order->set('state', 'completed');
+    $this->order->save();
+    $this->getSession()->reload();
+    $this->assertSession()->pageTextContains('Access denied');
+    $user2 = $this->drupalCreateUser(['administer commerce_invoice']);
+    $this->drupalLogin($user2);
+    $this->drupalGet($this->orderInvoicesUrl);
+    $this->assertSession()->pageTextContains('There are no invoices yet.');
+    $this->assertSession()->linkByHrefExists($this->orderInvoiceGenerateUrl);
+  }
+
+  /**
    * Tests the order "Invoices" tab and the invoice generate form.
    */
   public function testOrderInvoices() {
