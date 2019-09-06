@@ -5,15 +5,3 @@ commerce_invoice.configuration:
     _title: 'Invoices'
   requirements:
     _permission: 'access commerce administration pages'
-
-entity.commerce_invoice.generate:
-  path: '/admin/commerce/orders/{commerce_order}/invoices/generate'
-  defaults:
-    _controller: '\Drupal\commerce_invoice\Controller\InvoiceController::generate'
-    _title: 'Generate invoice'
-  options:
-    parameters:
-      commerce_order:
-        type: 'entity:commerce_order'
-  requirements:
-    _custom_access: '\Drupal\commerce_invoice\Controller\InvoiceController::checkAccess'

@@ -66,8 +66,6 @@ use Drupal\user\UserInterface;
  *   links = {
  *     "delete-form" = "/admin/commerce/invoices/{commerce_invoice}/delete",
  *     "payment-form" = "/admin/commerce/invoices/{commerce_invoice}/payment",
- *     "generate" = "/admin/commerce/orders/{commerce_order}/invoices/generate",
- *     "order-collection" = "/admin/commerce/orders/{commerce_order}/invoices",
  *     "collection" = "/admin/commerce/invoices",
  *   },
  *   bundle_entity_type = "commerce_invoice_type",

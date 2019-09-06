@@ -1,4 +1,10 @@
 services:
+  access_check.invoice_order:
+    class: Drupal\commerce_invoice\Access\InvoiceOrderAccessCheck
+    arguments: ['@entity_type.manager']
+    tags:
+      - { name: access_check, applies_to: _invoice_order_access }
+
   commerce_invoice.invoice_generator:
     class: Drupal\commerce_invoice\InvoiceGenerator
     arguments: ['@database', '@entity_type.manager']
@@ -25,6 +31,11 @@ services:
   commerce_invoice.order_placed_subscriber:
     class: Drupal\commerce_invoice\EventSubscriber\OrderPlacedSubscriber
     arguments: ['@commerce_invoice.invoice_generator']
+    tags:
+      - { name: event_subscriber }
+
+  commerce_invoice.route_subscriber:
+    class: Drupal\commerce_invoice\EventSubscriber\RouteSubscriber
     tags:
       - { name: event_subscriber }
 

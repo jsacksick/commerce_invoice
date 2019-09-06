@@ -22,11 +22,18 @@ class InvoiceAdminTest extends InvoiceBrowserTestBase {
   protected $collectionUrl;
 
   /**
-   * The order invoices tab url.
+   * The order invoices url.
    *
    * @var string
    */
-  protected $invoicesTabUrl;
+  protected $orderInvoicesUrl;
+
+  /**
+   * The order invoice generate form url.
+   *
+   * @var string
+   */
+  protected $orderInvoiceGenerateUrl;
 
   /**
    * A sample order.
@@ -70,18 +77,22 @@ class InvoiceAdminTest extends InvoiceBrowserTestBase {
       'purchased_entity' => $variation,
     ]);
     $order_item->save();
+    $billing_profile = $this->createEntity('profile', [
+      'type' => 'customer',
+      'uid' => $this->adminUser->id(),
+    ]);
     $this->order = $this->createEntity('commerce_order', [
       'uid' => $this->loggedInUser->id(),
       'order_number' => '6',
       'type' => 'default',
-      'state' => 'completed',
+      'state' => 'draft',
       'order_items' => [$order_item],
       'store_id' => $this->store,
+      'billing_profile' => $billing_profile,
     ]);
     $this->collectionUrl = Url::fromRoute('entity.commerce_invoice.collection')->toString();
-    $this->invoicesTabUrl = Url::fromRoute('entity.commerce_invoice.order_collection', [
-      'commerce_order' => $this->order->id(),
-    ])->toString();
+    $this->orderInvoicesUrl = $this->order->toUrl('invoices')->toString();
+    $this->orderInvoiceGenerateUrl = $this->order->toUrl('invoice-generate-form')->toString();
   }
 
   /**
@@ -95,19 +106,32 @@ class InvoiceAdminTest extends InvoiceBrowserTestBase {
   }
 
   /**
-   * Tests the "Download invoice" operation visibility.
+   * Tests the order "Invoices" tab and the invoice generate form.
    */
-  public function testDownloadInvoiceOperation() {
-    // Ensure the "Download invoice" operation is not shown for a draft order.
+  public function testOrderInvoices() {
+    // Ensure the "Invoices" operation is not shown for a draft order.
     $this->drupalGet($this->order->toUrl('collection'));
-    $this->assertSession()->linkByHrefNotExists($this->invoicesTabUrl);
+    $this->assertSession()->linkByHrefNotExists($this->orderInvoicesUrl);
     $order_edit_link = $this->order->toUrl('edit-form')->toString();
     $this->assertSession()->linkByHrefExists($order_edit_link);
 
     $this->order->set('state', 'completed');
     $this->order->save();
     $this->getSession()->reload();
-    $this->assertSession()->linkByHrefExists($this->invoicesTabUrl);
+    $this->assertSession()->linkByHrefExists($this->orderInvoicesUrl);
+    $this->drupalGet($this->orderInvoicesUrl);
+    $this->assertSession()->pageTextContains('There are no invoices yet.');
+    $this->assertSession()->linkByHrefExists($this->orderInvoiceGenerateUrl);
+    $page = $this->getSession()->getPage();
+
+    $this->drupalGet($this->orderInvoiceGenerateUrl);
+    $this->assertSession()->buttonExists('Generate');
+    $this->assertSession()->linkExists('Cancel');
+    $page->pressButton('Generate');
+    $this->assertSession()->pageTextNotContains('There are no invoices yet.');
+    $this->assertSession()->pageTextContains('Download');
+    $this->assertSession()->pageTextContains('Invoice number');
+    $this->assertSession()->linkByHrefNotExists($this->orderInvoiceGenerateUrl);
   }
 
   /**
@@ -161,8 +185,8 @@ class InvoiceAdminTest extends InvoiceBrowserTestBase {
     $this->getSession()->reload();
     $this->assertSession()->pageTextNotContains('There are no invoices yet.');
     $this->assertSession()->pageTextContains($invoice->label());
-    $this->assertSession()->pageTextContains('Download');
-    $this->assertSession()->pageTextContains('Pay');
+    $this->assertSession()->linkExists('Download');
+    $this->assertSession()->linkExists('Pay');
 
     // Ensure the listing works without the view.
     View::load('commerce_invoices')->delete();
