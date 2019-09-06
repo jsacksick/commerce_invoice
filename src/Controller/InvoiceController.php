@@ -112,8 +112,7 @@ class InvoiceController implements ContainerInjectionInterface {
   public function checkAccess(RouteMatchInterface $route_match, AccountInterface $account) {
     /** @var \Drupal\commerce_order\Entity\OrderInterface $order */
     $order = $route_match->getParameter('commerce_order');
-    if ($order->getState()->getId() == 'canceled' ||
-      $order->hasField('cart') && $order->get('cart')->value) {
+    if (in_array($order->getState()->getId(), ['canceled', 'draft'])) {
       return AccessResult::forbidden()->mergeCacheMaxAge(0);
     }
     /** @var \Drupal\commerce_invoice\Entity\ $invoice_storage */

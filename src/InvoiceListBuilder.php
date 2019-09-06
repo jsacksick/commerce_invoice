@@ -107,14 +107,16 @@ class InvoiceListBuilder extends EntityListBuilder {
   protected function getDefaultOperations(EntityInterface $entity) {
     $operations = parent::getDefaultOperations($entity);
 
-    $operations['download'] = [
-      'title' => t('Download'),
-      'url' => Url::fromRoute('entity_print.view', [
-        'export_type' => 'pdf',
-        'entity_id' => $entity->id(),
-        'entity_type' => 'commerce_invoice',
-      ], ['language' => $entity->language()]),
-    ];
+    if ($entity->access('view')) {
+      $operations['download'] = [
+        'title' => t('Download'),
+        'url' => Url::fromRoute('entity_print.view', [
+          'export_type' => 'pdf',
+          'entity_id' => $entity->id(),
+          'entity_type' => 'commerce_invoice',
+        ], ['language' => $entity->language()]),
+      ];
+    }
 
     if ($entity->access('update') && !$entity->isPaid()) {
       $operations['pay'] = [

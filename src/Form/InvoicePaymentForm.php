@@ -67,7 +67,7 @@ class InvoicePaymentForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    if (!$this->invoice->isPaid()) {
+    if (!$this->invoice->isPaid() && $this->invoice->getTotalPrice()) {
       $this->invoice->setTotalPaid($this->invoice->getTotalPrice());
       $this->invoice->save();
     }
