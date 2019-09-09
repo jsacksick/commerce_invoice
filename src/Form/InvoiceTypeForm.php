@@ -90,7 +90,7 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
     // Load number patterns.
     $storage = $this->entityTypeManager->getStorage('commerce_number_pattern');
     $query = $storage->getQuery();
-    $query->condition('type', 'commerce_invoice');
+    $query->condition('targetEntityType', 'commerce_invoice');
     $number_patterns = $query->execute();
     $options = [];
     if ($number_patterns) {

@@ -6,7 +6,7 @@ dependencies:
       - commerce_invoice
 id: invoice_infinite
 label: Infinite
-entityType: commerce_invoice
+targetEntityType: commerce_invoice
 plugin: infinite
 configuration:
   pattern: '{number}'
