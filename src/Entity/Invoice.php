@@ -34,7 +34,6 @@ use Drupal\user\UserInterface;
  *   handlers = {
  *     "event" = "Drupal\commerce_invoice\Event\InvoiceEvent",
  *     "storage" = "Drupal\commerce_invoice\InvoiceStorage",
- *     "view_builder" = "Drupal\commerce_invoice\InvoiceViewBuilder",
  *     "list_builder" = "Drupal\commerce_invoice\InvoiceListBuilder",
  *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
  *     "views_data" = "Drupal\commerce\CommerceEntityViewsData",

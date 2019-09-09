@@ -109,7 +109,7 @@ class InvoiceListBuilder extends EntityListBuilder {
     if ($entity->access('view')) {
       $operations['download'] = [
         'title' => t('Download'),
-        'url' => $entity->toUrl('download', ['language' => $entity->language()->getId()]),
+        'url' => $entity->toUrl('download', ['language' => $entity->language()]),
       ];
     }
 

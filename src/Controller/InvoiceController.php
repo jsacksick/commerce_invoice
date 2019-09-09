@@ -78,9 +78,9 @@ class InvoiceController implements ContainerInjectionInterface {
 
     $config = $this->configFactory->get('entity_print.settings');
     // Check whether we need to force the download.
-    $attachment = $config->get('force_download') ? 'attachment' : NULL;
+    $content_disposition = $config->get('force_download') ? 'attachment' : NULL;
     $headers = file_get_content_headers($file);
-    return new BinaryFileResponse($file->getFileUri(), 200, $headers, FALSE, $attachment);
+    return new BinaryFileResponse($file->getFileUri(), 200, $headers, FALSE, $content_disposition);
   }
 
 }

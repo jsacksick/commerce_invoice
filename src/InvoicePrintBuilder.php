@@ -88,8 +88,10 @@ class InvoicePrintBuilder implements InvoicePrintBuilderInterface {
    */
   public function build(InvoiceInterface $invoice) {
     $filename = $this->generateFilename($invoice);
+    $langcode = $invoice->language()->getId();
     $files = $this->fileStorage->loadByProperties([
       'uri' => "private://$filename",
+      'langcode' => $langcode,
     ]);
 
     if ($files) {
@@ -113,7 +115,7 @@ class InvoicePrintBuilder implements InvoicePrintBuilderInterface {
     $file = $this->fileStorage->create([
       'uri' => $uri,
       'uid' => $this->currentUser->id(),
-      'langcode' => $invoice->language()->getId(),
+      'langcode' => $langcode,
       'status' => FILE_STATUS_PERMANENT,
     ]);
     $file->save();
@@ -131,7 +133,7 @@ class InvoicePrintBuilder implements InvoicePrintBuilderInterface {
    */
   protected function generateFilename(InvoiceInterface $invoice) {
     $file_name = $this->filenameGenerator->generateFilename([$invoice]);
-    $file_name .= '-' . $invoice->language()->getId() . '-' . $invoice->getState()->getId() . '.pdf';
+    $file_name .= '-' . $invoice->getState()->getId() . '.pdf';
     return $file_name;
   }
 

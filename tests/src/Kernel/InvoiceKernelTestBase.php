@@ -18,6 +18,7 @@ abstract class InvoiceKernelTestBase extends CommerceKernelTestBase {
    * @var array
    */
   public static $modules = [
+    'entity_print',
     'entity_reference_revisions',
     'profile',
     'state_machine',
@@ -38,12 +39,13 @@ abstract class InvoiceKernelTestBase extends CommerceKernelTestBase {
     $this->installEntitySchema('commerce_order_item');
     $this->installEntitySchema('commerce_invoice');
     $this->installEntitySchema('commerce_invoice_item');
-    $this->installConfig([
-      'commerce_invoice',
-      'commerce_order',
-    ]);
     $this->installEntitySchema('commerce_number_pattern');
     $this->installSchema('commerce_number_pattern', ['commerce_number_pattern_sequence']);
+    $this->installConfig([
+      'commerce_invoice',
+      'entity_print',
+      'commerce_order',
+    ]);
   }
 
 }
