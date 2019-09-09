@@ -8,7 +8,6 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -110,11 +109,7 @@ class InvoiceListBuilder extends EntityListBuilder {
     if ($entity->access('view')) {
       $operations['download'] = [
         'title' => t('Download'),
-        'url' => Url::fromRoute('entity_print.view', [
-          'export_type' => 'pdf',
-          'entity_id' => $entity->id(),
-          'entity_type' => 'commerce_invoice',
-        ], ['language' => $entity->language()]),
+        'url' => $entity->toUrl('download', ['language' => $entity->language()->getId()]),
       ];
     }
 

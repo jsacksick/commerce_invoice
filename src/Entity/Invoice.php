@@ -64,9 +64,10 @@ use Drupal\user\UserInterface;
  *     "bundle" = "type",
  *   },
  *   links = {
+ *     "collection" = "/admin/commerce/invoices",
+ *     "download" = "/invoice/{commerce_invoice}/download",
  *     "delete-form" = "/admin/commerce/invoices/{commerce_invoice}/delete",
  *     "payment-form" = "/admin/commerce/invoices/{commerce_invoice}/payment",
- *     "collection" = "/admin/commerce/invoices",
  *   },
  *   bundle_entity_type = "commerce_invoice_type",
  *   field_ui_base_route = "entity.commerce_invoice_type.edit_form",
@@ -540,6 +541,14 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
       $due_date = $invoice_date->modify("+{$invoice_type->getDueDays()} days");
       $this->setDueDateTime($due_date->getTimestamp());
     }
+    // Store the invoice type data to make sure those are immutable.
+    if (!$this->getData('invoice_type', FALSE)) {
+      $invoice_type_data = $invoice_type->toArray();
+      // Store in the data array the following invoice type fields.
+      $fields_whitelist = ['paymentTerms', 'footerText', 'logo'];
+      $invoice_type_data = array_intersect_key($invoice_type_data, array_combine($fields_whitelist, $fields_whitelist));
+      $this->setData('invoice_type', $invoice_type_data);
+    }
   }
 
   /**
@@ -651,6 +660,7 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
 
     $fields['data'] = BaseFieldDefinition::create('map')
       ->setLabel(t('Data'))
+      ->setTranslatable(TRUE)
       ->setDescription(t('A serialized array of additional data.'));
 
     $fields['created'] = BaseFieldDefinition::create('created')

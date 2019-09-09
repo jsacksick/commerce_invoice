@@ -19,6 +19,9 @@ class InvoiceRouteProvider extends AdminHtmlRouteProvider {
     $entity_type_id = $entity_type->id();
     $order_entity_type = $this->entityTypeManager->getDefinition('commerce_order');
 
+    if ($download_route = $this->getDownloadRoute($entity_type)) {
+      $collection->add("entity.{$entity_type_id}.download", $download_route);
+    }
     if ($invoice_payment_route = $this->getInvoicePaymentFormRoute($entity_type)) {
       $collection->add("entity.{$entity_type_id}.payment_form", $invoice_payment_route);
     }
@@ -30,6 +33,37 @@ class InvoiceRouteProvider extends AdminHtmlRouteProvider {
     }
 
     return $collection;
+  }
+
+  /**
+   * Gets the download route.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+   *   The entity type.
+   *
+   * @return \Symfony\Component\Routing\Route|null
+   *   The generated route, if available.
+   */
+  protected function getDownloadRoute(EntityTypeInterface $entity_type) {
+    if ($entity_type->hasLinkTemplate('download')) {
+      $entity_type_id = $entity_type->id();
+      $route = new Route($entity_type->getLinkTemplate('download'));
+      $route
+        ->addDefaults([
+          '_controller' => '\Drupal\commerce_invoice\Controller\InvoiceController::download',
+        ])
+        ->setRequirement('_entity_access', "{$entity_type_id}.view")
+        ->setOption('parameters', [
+          $entity_type_id => ['type' => 'entity:' . $entity_type_id],
+        ]);
+
+      // Entity types with serial IDs can specify this in their route
+      // requirements, improving the matching process.
+      if ($this->getEntityTypeIdKeyType($entity_type) === 'integer') {
+        $route->setRequirement($entity_type_id, '\d+');
+      }
+      return $route;
+    }
   }
 
   /**

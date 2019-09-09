@@ -34,6 +34,10 @@ services:
     tags:
       - { name: event_subscriber }
 
+  commerce_invoice.print_builder:
+    class: Drupal\commerce_invoice\InvoicePrintBuilder
+    arguments: ['@config.factory', '@entity_type.manager', '@plugin.manager.entity_print.print_engine', '@entity_print.print_builder', '@entity_print.filename_generator', '@current_user']
+
   commerce_invoice.route_subscriber:
     class: Drupal\commerce_invoice\EventSubscriber\RouteSubscriber
     tags:

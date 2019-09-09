@@ -12,7 +12,6 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
-use Drupal\Core\Url;
 
 /**
  * Implements hook_entity_type_alter().
@@ -147,8 +146,13 @@ function template_preprocess_commerce_invoice(array &$variables) {
   /** @var Drupal\commerce_invoice\Entity\InvoiceInterface $invoice */
   $invoice = $variables['elements']['#commerce_invoice'];
   $token = \Drupal::token();
-  $invoice_type = InvoiceType::load($invoice->bundle());
-  $variables['invoice_type'] = $invoice_type;
+  $invoice_type_data = $invoice->getData('invoice_type', []);
+  if ($invoice_type_data) {
+    $invoice_type = InvoiceType::create($invoice_type_data);
+  }
+  else {
+    $invoice_type = InvoiceType::load($invoice->bundle());
+  }
 
   // Replace the tokens in the footer text + the payment terms.
   $data = ['commerce_invoice' => $invoice];

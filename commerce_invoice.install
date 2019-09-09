@@ -1,0 +1,26 @@
+<?php
+
+use Drupal\Core\StreamWrapper\PrivateStream;
+
+/**
+ * @file
+ * Contains install and update functions for Commerce Invoice.
+ */
+
+/**
+ * Implements hook_requirements().
+ */
+function commerce_invoice_requirements($phase) {
+  $requirements = [];
+
+  // Ensure the private file system path is configured.
+  if (in_array($phase, ['install', 'runtime']) && !PrivateStream::basePath()) {
+    $requirements['commerce_invoice_private_path'] = [
+      'title' => t('Private file system path'),
+      'description' => t('Commerce Invoice requires the private file system path to be configured.'),
+      'severity' => REQUIREMENT_ERROR,
+    ];
+  }
+
+  return $requirements;
+}
