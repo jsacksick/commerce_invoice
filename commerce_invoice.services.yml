@@ -9,10 +9,6 @@ services:
     class: Drupal\commerce_invoice\InvoiceGenerator
     arguments: ['@database', '@entity_type.manager']
 
-  commerce_invoice.invoice_number_generator:
-    class: Drupal\commerce_invoice\InvoiceNumberGenerator
-    arguments: ['@database', '@lock', '@datetime.time']
-
   commerce_invoice.invoice_total_summary:
     class: Drupal\commerce_invoice\InvoiceTotalSummary
     arguments: ['@commerce_order.adjustment_transformer']

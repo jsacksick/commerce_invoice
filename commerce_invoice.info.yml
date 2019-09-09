@@ -8,7 +8,7 @@ dependencies:
   - commerce:commerce_order
   - commerce:commerce_price
   - commerce:commerce_store
-  - commerce_number_pattern:commerce_number_pattern
+  - commerce:commerce_number_pattern
   - entity:entity
   - entity_print:entity_print
   - profile:profile

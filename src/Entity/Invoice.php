@@ -70,6 +70,7 @@ use Drupal\user\UserInterface;
  *   },
  *   bundle_entity_type = "commerce_invoice_type",
  *   field_ui_base_route = "entity.commerce_invoice_type.edit_form",
+ *   allow_number_patterns = TRUE,
  * )
  */
 class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
@@ -512,9 +513,12 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
 
     // Skip generating an invoice number for draft invoices.
     if ($this->getState()->getId() != 'draft' && empty($this->getInvoiceNumber())) {
-      /** @var \Drupal\commerce_invoice\InvoiceNumberGeneratorInterface $invoice_number_generator */
-      $invoice_number_generator = \Drupal::service('commerce_invoice.invoice_number_generator');
-      $this->setInvoiceNumber($invoice_number_generator->generateInvoiceNumber($this));
+      /** @var \Drupal\commerce_number_pattern\Entity\NumberPatternInterface $number_pattern */
+      $number_pattern = $invoice_type->getNumberPattern();
+      if ($number_pattern) {
+        $invoice_number = $number_pattern->getPlugin()->generate($this);
+        $this->setInvoiceNumber($invoice_number);
+      }
     }
 
     $customer = $this->getCustomer();
