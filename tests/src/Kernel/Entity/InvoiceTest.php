@@ -54,6 +54,8 @@ class InvoiceTest extends InvoiceKernelTestBase {
    * @covers ::setCustomer
    * @covers ::getCustomerId
    * @covers ::setCustomerId
+   * @covers ::getEmail
+   * @covers ::setEmail
    * @covers ::getBillingProfile
    * @covers ::setBillingProfile
    * @covers ::getOrders
@@ -159,6 +161,9 @@ class InvoiceTest extends InvoiceKernelTestBase {
     $invoice->setCustomerId($this->user->id());
     $this->assertEquals($this->user, $invoice->getCustomer());
     $this->assertEquals($this->user->id(), $invoice->getCustomerId());
+
+    $invoice->setEmail('commerce@example.com');
+    $this->assertEquals('commerce@example.com', $invoice->getEmail());
 
     $invoice->setBillingProfile($profile);
     $this->assertEquals($profile, $invoice->getBillingProfile());

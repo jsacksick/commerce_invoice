@@ -163,6 +163,21 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
   /**
    * {@inheritdoc}
    */
+  public function getEmail() {
+    return $this->get('mail')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setEmail($mail) {
+    $this->set('mail', $mail);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getBillingProfile() {
     return $this->get('billing_profile')->entity;
   }
@@ -640,6 +655,18 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
         'type' => 'author',
         'weight' => 0,
       ]);
+
+    $fields['mail'] = BaseFieldDefinition::create('email')
+      ->setLabel(t('Contact email'))
+      ->setDescription(t('The email address associated with the invoice.'))
+      ->setDefaultValue('')
+      ->setSetting('max_length', 255)
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'string',
+        'weight' => 0,
+      ])
+      ->setDisplayConfigurable('view', TRUE);
 
     $fields['billing_profile'] = BaseFieldDefinition::create('entity_reference_revisions')
       ->setLabel(t('Billing information'))

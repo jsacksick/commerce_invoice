@@ -84,7 +84,9 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
     $invoice_item_storage = $this->entityTypeManager->getStorage('commerce_invoice_item');
     // Assume the order type from the first passed order, we'll use it
     // to determine the invoice type to create.
+    /** @var \Drupal\commerce_order\Entity\OrderInterface $first_order */
     $first_order = reset($orders);
+
     /** @var \Drupal\commerce_order\Entity\OrderTypeInterface $order_type */
     $order_type = OrderType::load($first_order->bundle());
     $values += [
@@ -94,6 +96,12 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
     ];
     /** @var \Drupal\commerce_invoice\Entity\InvoiceInterface $invoice */
     $invoice = $invoice_storage->create($values);
+
+    // If we're generating an invoice for a single order, copy its email.
+    if (count($orders) === 1 && $first_order->getEmail()) {
+      $invoice->setEmail($first_order->getEmail());
+    }
+
     $billing_profile = $profile->createDuplicate();
     $billing_profile->save();
     $invoice->setBillingProfile($billing_profile);

@@ -46,7 +46,7 @@ class InvoiceTotalSummary extends FormatterBase implements ContainerFactoryPlugi
    *   The view mode.
    * @param array $third_party_settings
    *   Any third party settings.
-   * @param \Drupal\commerce_invoice\InvoiceTotalSummaryInterface $order_total_summary
+   * @param \Drupal\commerce_invoice\InvoiceTotalSummaryInterface $invoice_total_summary
    *   The invoice total summary service.
    */
   public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, $label, $view_mode, array $third_party_settings, InvoiceTotalSummaryInterface $invoice_total_summary) {

@@ -63,6 +63,24 @@ interface InvoiceInterface extends ContentEntityInterface, EntityAdjustableInter
   public function getCustomerId();
 
   /**
+   * Gets the invoice email.
+   *
+   * @return string
+   *   The invoice email.
+   */
+  public function getEmail();
+
+  /**
+   * Sets the invoice email.
+   *
+   * @param string $mail
+   *   The invoice email.
+   *
+   * @return $this
+   */
+  public function setEmail($mail);
+
+  /**
    * Sets the customer user ID.
    *
    * @param int $uid
