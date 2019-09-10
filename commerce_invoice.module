@@ -8,10 +8,12 @@
 use Drupal\commerce\EntityHelper;
 use Drupal\commerce\PurchasableEntityInterface;
 use Drupal\commerce_invoice\Entity\InvoiceType;
+use Drupal\Core\Entity\EntityFormInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
+use Drupal\language\Entity\ContentLanguageSettings;
 
 /**
  * Implements hook_entity_type_alter().
@@ -213,4 +215,38 @@ function commerce_invoice_entity_operation(EntityInterface $entity) {
     'weight' => 50,
   ];
   return $operations;
+}
+
+/**
+ * Submit handler for the commerce_invoice_language_configuration element.
+ */
+function commerce_invoice_language_configuration_element_submit(&$form, FormStateInterface $form_state) {
+  // Iterate through all the language_configuration elements and save their
+  // values.
+  // In case we are editing a bundle, we must check the new bundle name,
+  // because e.g. hook_ENTITY_update fired before.
+  if ($language = $form_state->get('language')) {
+    foreach ($language as $element_name => $values) {
+      $entity_type_id = $values['entity_type'];
+      $bundle = $values['bundle'];
+      $form_object = $form_state->getFormObject();
+      if ($form_object instanceof EntityFormInterface) {
+        /** @var \Drupal\Core\Entity\EntityFormInterface $form_object */
+        $entity = $form_object->getEntity();
+        if ($entity->getEntityType()->getBundleOf()) {
+          $bundle = $entity->id();
+          $language[$element_name]['bundle'] = $bundle;
+        }
+      }
+      $config = ContentLanguageSettings::loadByEntityTypeBundle($entity_type_id, $bundle);
+      $values = $form_state->getValue([$element_name]);
+      $config->setDefaultLangcode($values['langcode']);
+      $config->setThirdPartySetting('commerce_invoice', 'generate_translations', $values['generate_translations']);
+      $config->setLanguageAlterable(FALSE);
+      $config->save();
+
+      // Set the form_state language with the updated bundle.
+      $form_state->set('language', $language);
+    }
+  }
 }

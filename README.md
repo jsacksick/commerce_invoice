@@ -6,10 +6,11 @@ Commerce Invoice
 1. Enable invoicing for the desired order type by going to the order type admin edit form
 2. From there, the automatic invoice generation (i.e automatic invoice generation when an order is placed) can be turned 
 on.
+3. The private filesystem path must be configured (See https://www.drupal.org/docs/8/core/modules/file/overview#private-file-system).
 
 ## Configuring the invoice types
 
-The module provides a "default" invoice type that can be configured by navigating to admin/commerce/config/invoice-types.
+The module provides a "default" invoice type that can be configured by navigating to /admin/commerce/config/invoice-types.
 
 ### Configuring Entity Print
 
@@ -26,7 +27,7 @@ By default the "default" invoice type that ships with the module uses the "infin
 
 The number patterns can be configured by navigating to /admin/commerce/config/number-patterns.
 
-## Using the invoice generator service
+## Manually generating invoices
 
 In case you need to manually generate invoices, the invoice generator service should be used:
 

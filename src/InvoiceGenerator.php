@@ -7,6 +7,8 @@ use Drupal\commerce_order\Entity\OrderType;
 use Drupal\commerce_store\Entity\StoreInterface;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\language\Entity\ContentLanguageSettings;
 use Drupal\profile\Entity\ProfileInterface;
 
 class InvoiceGenerator implements InvoiceGeneratorInterface {
@@ -26,16 +28,26 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
   protected $entityTypeManager;
 
   /**
+   * The module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
    * Constructs a new InvoiceGenerator object.
    *
    * @param \Drupal\Core\Database\Connection $connection
    *   The database connection to use.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler.
    */
-  public function __construct(Connection $connection, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(Connection $connection, EntityTypeManagerInterface $entity_type_manager, ModuleHandlerInterface $module_handler) {
     $this->connection = $connection;
     $this->entityTypeManager = $entity_type_manager;
+    $this->moduleHandler = $module_handler;
   }
 
   /**
@@ -102,6 +114,16 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
       $invoice->setTotalPaid($total_paid);
     }
     $invoice->setOrders($orders);
+
+    // If the invoice type is configured to do so, generate the translations
+    // for all the available languages.
+    if ($this->moduleHandler->moduleExists('language')) {
+      $config = ContentLanguageSettings::loadByEntityTypeBundle('commerce_invoice', $invoice->bundle());
+      // @todo: Add translation logic below.
+      if ($config && $config->getThirdPartySetting('commerce_invoice', 'generate_translations', FALSE)) {
+      }
+    }
+
     $invoice->save();
     return $invoice;
   }

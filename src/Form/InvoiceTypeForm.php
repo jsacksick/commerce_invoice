@@ -165,14 +165,13 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
         '#title' => $this->t('Language settings'),
       ];
       $form['language']['language_configuration'] = [
-        '#type' => 'language_configuration',
+        '#type' => 'commerce_invoice_language_configuration',
         '#entity_information' => [
           'entity_type' => 'commerce_invoice',
           'bundle' => $invoice_type->id(),
         ],
         '#default_value' => ContentLanguageSettings::loadByEntityTypeBundle('commerce_invoice', $invoice_type->id()),
       ];
-      $form['#submit'][] = 'language_configuration_element_submit';
     }
 
     return $form;
