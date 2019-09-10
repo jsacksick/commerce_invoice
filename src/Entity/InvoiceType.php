@@ -2,10 +2,8 @@
 
 namespace Drupal\commerce_invoice\Entity;
 
-use Drupal\commerce\CommerceSinglePluginCollection;
 use Drupal\commerce\Entity\CommerceBundleEntityBase;
 use Drupal\commerce_number_pattern\Entity\NumberPattern;
-use Drupal\paragraphs\ParagraphsBehaviorCollection;
 
 /**
  * Defines the invoice type entity class.

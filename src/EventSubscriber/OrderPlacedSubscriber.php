@@ -10,7 +10,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class OrderPlacedSubscriber implements EventSubscriberInterface {
 
   /**
-   * The invoice generator service.
+   * The invoice generator.
    *
    * @var \Drupal\commerce_invoice\InvoiceGeneratorInterface
    */
@@ -19,7 +19,7 @@ class OrderPlacedSubscriber implements EventSubscriberInterface {
   /**
    * Constructs a new OrderPlacedSubscriber object.
    *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   * @param \Drupal\commerce_invoice\InvoiceGeneratorInterface $invoice_generator
    *   The invoice generator.
    */
   public function __construct(InvoiceGeneratorInterface $invoice_generator) {

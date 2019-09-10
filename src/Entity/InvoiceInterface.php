@@ -5,8 +5,6 @@ namespace Drupal\commerce_invoice\Entity;
 use Drupal\commerce_order\EntityAdjustableInterface;
 use Drupal\commerce_price\Price;
 use Drupal\commerce_store\Entity\EntityStoreInterface;
-use Drupal\commerce_store\Entity\StoreInterface;
-use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\profile\Entity\ProfileInterface;

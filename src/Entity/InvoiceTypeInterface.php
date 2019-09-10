@@ -11,7 +11,7 @@ interface InvoiceTypeInterface extends CommerceBundleEntityInterface {
 
   /**
    * Gets the invoice type's number pattern.
-   **
+   *
    * @return \Drupal\commerce_number_pattern\Entity\NumberPatternInterface
    *   The invoice type number pattern.
    */
@@ -19,7 +19,7 @@ interface InvoiceTypeInterface extends CommerceBundleEntityInterface {
 
   /**
    * Gets the invoice type's number pattern ID.
-   **
+   *
    * @return string
    *   The invoice type number pattern ID.
    */
@@ -63,7 +63,7 @@ interface InvoiceTypeInterface extends CommerceBundleEntityInterface {
 
   /**
    * Gets the invoice type's footer text.
-   **
+   *
    * @return string
    *   The invoice type footer text.
    */
@@ -99,7 +99,7 @@ interface InvoiceTypeInterface extends CommerceBundleEntityInterface {
 
   /**
    * Gets the invoice type's payment terms.
-   **
+   *
    * @return string
    *   The invoice type payment terms.
    */

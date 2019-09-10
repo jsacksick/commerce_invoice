@@ -1,11 +1,11 @@
 <?php
 
-use Drupal\Core\StreamWrapper\PrivateStream;
-
 /**
  * @file
  * Contains install and update functions for Commerce Invoice.
  */
+
+use Drupal\Core\StreamWrapper\PrivateStream;
 
 /**
  * Implements hook_requirements().

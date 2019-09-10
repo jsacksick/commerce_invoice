@@ -7,7 +7,6 @@ use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
-use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class InvoiceGenerateForm extends ConfirmFormBase {

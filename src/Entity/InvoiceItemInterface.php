@@ -6,11 +6,12 @@ use Drupal\commerce_order\Entity\OrderItemInterface;
 use Drupal\commerce_order\EntityAdjustableInterface;
 use Drupal\commerce_price\Price;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityChangedInterface;
 
 /**
  * Defines the interface for invoice items.
  */
-interface InvoiceItemInterface extends ContentEntityInterface, EntityAdjustableInterface {
+interface InvoiceItemInterface extends ContentEntityInterface, EntityAdjustableInterface, EntityChangedInterface {
 
   /**
    * Gets the parent invoice.

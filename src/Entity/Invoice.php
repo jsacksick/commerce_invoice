@@ -157,6 +157,7 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
     $this->set('uid', $uid);
     return $this;
   }
+
   /**
    * {@inheritdoc}
    */

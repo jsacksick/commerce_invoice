@@ -53,6 +53,9 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
     }
   }
 
+  /**
+   * @see \Drupal\commerce_invoice\InvoiceGeneratorInterface::generate()
+   */
   protected function doGenerate(array $orders, StoreInterface $store, ProfileInterface $profile, array $values = []) {
     $invoice_storage = $this->entityTypeManager->getStorage('commerce_invoice');
     $invoice_item_storage = $this->entityTypeManager->getStorage('commerce_invoice_item');
@@ -87,7 +90,7 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
         /** @var \Drupal\commerce_invoice\Entity\InvoiceItemInterface $invoice_item */
         $invoice_item = $invoice_item_storage->create([
           'langcode' => $langcode,
-          'type' => $invoice_item_type
+          'type' => $invoice_item_type,
         ]);
         $invoice_item->populateFromOrderItem($order_item);
         $invoice_item->save();

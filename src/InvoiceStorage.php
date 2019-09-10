@@ -4,8 +4,6 @@ namespace Drupal\commerce_invoice;
 
 use Drupal\commerce\CommerceContentEntityStorage;
 use Drupal\commerce_invoice\Entity\InvoiceInterface;
-use Drupal\commerce_invoice\Event\InvoiceEvent;
-use Drupal\commerce_invoice\Event\InvoiceEvents;
 use Drupal\Core\Entity\EntityInterface;
 
 class InvoiceStorage extends CommerceContentEntityStorage {

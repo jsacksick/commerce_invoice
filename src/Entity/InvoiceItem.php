@@ -6,7 +6,6 @@ use Drupal\commerce\Entity\CommerceContentEntityBase;
 use Drupal\commerce_order\Adjustment;
 use Drupal\commerce_order\Entity\OrderItemInterface;
 use Drupal\commerce_price\Price;
-use Drupal\commerce_product\Entity\ProductVariationInterface;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -46,6 +45,8 @@ use Drupal\Core\Field\BaseFieldDefinition;
  * )
  */
 class InvoiceItem extends CommerceContentEntityBase implements InvoiceItemInterface {
+
+  use EntityChangedTrait;
 
   /**
    * {@inheritdoc}
@@ -378,8 +379,7 @@ class InvoiceItem extends CommerceContentEntityBase implements InvoiceItemInterf
         'type' => 'text_default',
         'weight' => 0,
       ])
-      ->setTranslatable(TRUE)
-      ->setDisplayConfigurable('view', TRUE);
+      ->setTranslatable(TRUE);
 
     $fields['quantity'] = BaseFieldDefinition::create('decimal')
       ->setLabel(t('Quantity'))
@@ -387,8 +387,7 @@ class InvoiceItem extends CommerceContentEntityBase implements InvoiceItemInterf
       ->setReadOnly(TRUE)
       ->setSetting('unsigned', TRUE)
       ->setSetting('min', 0)
-      ->setDefaultValue(1)
-      ->setDisplayConfigurable('view', TRUE);
+      ->setDefaultValue(1);
 
     $fields['unit_price'] = BaseFieldDefinition::create('commerce_price')
       ->setLabel(t('Unit price'))
@@ -399,14 +398,12 @@ class InvoiceItem extends CommerceContentEntityBase implements InvoiceItemInterf
     $fields['total_price'] = BaseFieldDefinition::create('commerce_price')
       ->setLabel(t('Total price'))
       ->setDescription(t('The total price of the invoice item.'))
-      ->setReadOnly(TRUE)
-      ->setDisplayConfigurable('view', TRUE);
+      ->setReadOnly(TRUE);
 
     $fields['adjustments'] = BaseFieldDefinition::create('commerce_adjustment')
       ->setLabel(t('Adjustments'))
       ->setRequired(FALSE)
-      ->setCardinality(BaseFieldDefinition::CARDINALITY_UNLIMITED)
-      ->setDisplayConfigurable('view', TRUE);
+      ->setCardinality(BaseFieldDefinition::CARDINALITY_UNLIMITED);
 
     $fields['data'] = BaseFieldDefinition::create('map')
       ->setLabel(t('Data'))
@@ -415,14 +412,12 @@ class InvoiceItem extends CommerceContentEntityBase implements InvoiceItemInterf
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'))
       ->setDescription(t('The time when the invoice item was created.'))
-      ->setRequired(TRUE)
-      ->setDisplayOptions('view', [
-        'label' => 'hidden',
-        'type' => 'timestamp',
-        'weight' => 0,
-      ])
-      ->setDisplayConfigurable('form', TRUE)
-      ->setDisplayConfigurable('view', TRUE);
+      ->setRequired(TRUE);
+
+    $fields['changed'] = BaseFieldDefinition::create('changed')
+      ->setLabel(t('Changed'))
+      ->setDescription(t('The time when the invoice item was last edited.'))
+      ->setRequired(TRUE);
 
     $fields['order_item_id'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Order item'))

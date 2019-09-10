@@ -16,7 +16,7 @@ class InvoiceTotalSummary implements InvoiceTotalSummaryInterface {
   protected $adjustmentTransformer;
 
   /**
-   * Constructs a new OrderTotalSummary object.
+   * Constructs a new InvoiceTotalSummary object.
    *
    * @param \Drupal\commerce_order\AdjustmentTransformerInterface $adjustment_transformer
    *   The adjustment transformer.

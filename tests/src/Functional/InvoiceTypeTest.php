@@ -76,7 +76,7 @@ class InvoiceTypeTest extends InvoiceBrowserTestBase {
     $edit = [
       'label' => $this->randomString(),
       'id' => $this->randomMachineName(),
-      'paymentTerms' => $this->randomString()
+      'paymentTerms' => $this->randomString(),
     ];
     $this->submitForm($edit, t('Save'));
     $this->assertSession()->pageTextContains(t('Saved the @name invoice type.', ['@name' => $edit['label']]));

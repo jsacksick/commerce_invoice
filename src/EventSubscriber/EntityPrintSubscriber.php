@@ -21,7 +21,7 @@ class EntityPrintSubscriber implements EventSubscriberInterface {
     $event->getBuild()['#attached']['library'][] = 'commerce_invoice/entity-print-styling';
   }
 
-  /**s
+  /**
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {

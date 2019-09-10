@@ -18,7 +18,7 @@ use Drupal\Core\Render\Element;
  */
 function commerce_invoice_entity_type_alter(array &$entity_types) {
   /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
-  if (isset($entity_types['commerce_order'])){
+  if (isset($entity_types['commerce_order'])) {
     $entity_types['commerce_order']->setLinkTemplate('invoices', '/admin/commerce/orders/{commerce_order}/invoices');
     $entity_types['commerce_order']->setLinkTemplate('invoice-generate-form', '/admin/commerce/orders/{commerce_order}/invoices/generate');
   }

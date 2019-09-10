@@ -22,6 +22,6 @@ interface InvoiceTotalSummaryInterface {
    *         - percentage: The decimal adjustment percentage, when available.
    *     - total: The invoice total price.
    */
-  public function buildTotals(InvoiceInterface $order);
+  public function buildTotals(InvoiceInterface $invoice);
 
 }

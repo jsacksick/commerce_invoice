@@ -140,7 +140,7 @@ class InvoiceTypeForm extends CommerceBundleEntityFormBase {
     $form['payment-terms']['dueDays'] = [
       '#type' => 'number',
       '#size' => 3,
-      '#description' => $this->t('used to determine the invoice\'s due date.'),
+      '#description' => $this->t("used to determine the invoice's due date."),
       '#field_suffix' => $this->t('days'),
       '#title' => $this->t('Due date'),
       '#default_value' => $invoice_type->getDueDays(),
