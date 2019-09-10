@@ -26,9 +26,7 @@
   {% if (invoice.billing_information) %}
     <div class="billing-information">
       <h3>{{ 'Billed to'|t }}</h3>
-      {% block invoice.billing_information %}
-        {{ invoice.billing_information }}
-      {% endblock %}
+      {{ invoice.billing_information }}
     </div>
   {% endif %}
   <div class="invoice-info">
