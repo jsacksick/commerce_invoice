@@ -45,7 +45,7 @@
           {{ 'Customer Information'|t }}
         </summary>
         <div class="details-wrapper seven-details__wrapper">
-          {% for key in ['uid'] %}
+          {% for key in ['uid', 'mail'] %}
             {% if invoice[key] %}
               <div class="form-item">
                 {{ invoice[key] }}
