@@ -30,6 +30,9 @@ class LanguageConfiguration extends FormElement {
 
   /**
    * Process handler for the commerce_invoice_language_configuration element.
+   *
+   * @return array
+   *   The processed element.
    */
   public static function processLanguageConfiguration(&$element, FormStateInterface $form_state, &$form) {
     $options = isset($element['#options']) ? $element['#options'] : [];
@@ -94,6 +97,7 @@ class LanguageConfiguration extends FormElement {
    * Wraps the language manager.
    *
    * @return \Drupal\Core\Language\LanguageManagerInterface
+   *   The language manager.
    */
   protected static function languageManager() {
     return \Drupal::languageManager();

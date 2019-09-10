@@ -8,6 +8,7 @@ use Drupal\commerce_store\Entity\StoreInterface;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\language\Entity\ContentLanguageSettings;
 use Drupal\profile\Entity\ProfileInterface;
 
@@ -28,6 +29,13 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
   protected $entityTypeManager;
 
   /**
+   * The language manager.
+   *
+   * @var \Drupal\Core\Language\LanguageManagerInterface
+   */
+  protected $languageManager;
+
+  /**
    * The module handler.
    *
    * @var \Drupal\Core\Extension\ModuleHandlerInterface
@@ -41,12 +49,15 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
    *   The database connection to use.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
+   * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
+   *   The language manager.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler.
    */
-  public function __construct(Connection $connection, EntityTypeManagerInterface $entity_type_manager, ModuleHandlerInterface $module_handler) {
+  public function __construct(Connection $connection, EntityTypeManagerInterface $entity_type_manager, LanguageManagerInterface $language_manager, ModuleHandlerInterface $module_handler) {
     $this->connection = $connection;
     $this->entityTypeManager = $entity_type_manager;
+    $this->languageManager = $language_manager;
     $this->moduleHandler = $module_handler;
   }
 
@@ -119,8 +130,17 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
     // for all the available languages.
     if ($this->moduleHandler->moduleExists('language')) {
       $config = ContentLanguageSettings::loadByEntityTypeBundle('commerce_invoice', $invoice->bundle());
-      // @todo: Add translation logic below.
       if ($config && $config->getThirdPartySetting('commerce_invoice', 'generate_translations', FALSE)) {
+        $languages = $this->languageManager->getLanguages();
+        foreach ($languages as $langcode => $language) {
+          if ($invoice->hasTranslation($langcode)) {
+            continue;
+          }
+          // Currently, only the data field is translatable on invoices, we
+          // store the invoice type data there and make sure the translated data
+          // is stored inside Invoice::presave().
+          $invoice->addTranslation($langcode);
+        }
       }
     }
 

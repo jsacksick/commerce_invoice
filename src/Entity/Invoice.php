@@ -39,7 +39,7 @@ use Drupal\user\UserInterface;
  *     "views_data" = "Drupal\commerce\CommerceEntityViewsData",
  *     "form" = {
  *       "generate" = "Drupal\commerce_invoice\Form\InvoiceGenerateForm",
- *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
+ *       "delete" = "Drupal\commerce_invoice\Form\InvoiceDeleteForm",
  *     },
  *     "local_task_provider" = {
  *       "default" = "Drupal\entity\Menu\DefaultEntityLocalTaskProvider",
@@ -510,6 +510,28 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
         throw new EntityMalformedException(sprintf('Required invoice field "%s" is empty.', $field));
       }
     }
+    // Store the original override language to be able to put it back.
+    $original_language = $this->languageManager()->getConfigOverrideLanguage();
+
+    // Store the invoice type data in the invoice data for immutability reasons.
+    $fields_whitelist = ['paymentTerms', 'footerText', 'logo'];
+    $fields_whitelist = array_combine($fields_whitelist, $fields_whitelist);
+    // The following code is necessary to store the translated invoice type
+    // data for each translation.
+    foreach ($this->getTranslationLanguages() as $langcode => $language) {
+      $translated_invoice = $this->getTranslation($langcode);
+      if (!$translated_invoice->getData('invoice_type', FALSE)) {
+        $this->languageManager()->setConfigOverrideLanguage($language);
+        $invoice_type = InvoiceType::load($this->bundle());
+        $invoice_type_data = $invoice_type->toArray();
+        // Store in the data array the following invoice type fields.
+        $invoice_type_data = array_filter(array_intersect_key($invoice_type_data, $fields_whitelist));
+        if ($invoice_type_data) {
+          $translated_invoice->setData('invoice_type', $invoice_type_data);
+        }
+      }
+    }
+    $this->languageManager()->setConfigOverrideLanguage($original_language);
     $invoice_type = InvoiceType::load($this->bundle());
 
     // Skip generating an invoice number for draft invoices.
@@ -544,14 +566,6 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
       $invoice_date = DrupalDateTime::createFromTimestamp($this->getInvoiceDateTime());
       $due_date = $invoice_date->modify("+{$invoice_type->getDueDays()} days");
       $this->setDueDateTime($due_date->getTimestamp());
-    }
-    // Store the invoice type data to make sure those are immutable.
-    if (!$this->getData('invoice_type', FALSE)) {
-      $invoice_type_data = $invoice_type->toArray();
-      // Store in the data array the following invoice type fields.
-      $fields_whitelist = ['paymentTerms', 'footerText', 'logo'];
-      $invoice_type_data = array_intersect_key($invoice_type_data, array_combine($fields_whitelist, $fields_whitelist));
-      $this->setData('invoice_type', $invoice_type_data);
     }
   }
 
@@ -611,8 +625,7 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
       ->setCardinality(1)
       ->setRequired(TRUE)
       ->setSetting('target_type', 'commerce_store')
-      ->setSetting('handler', 'default')
-      ->setTranslatable(TRUE);
+      ->setSetting('handler', 'default');
 
     $fields['uid']
       ->setLabel(t('Customer'))
@@ -623,8 +636,7 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
       ->setDescription(t('Billing profile'))
       ->setSetting('target_type', 'profile')
       ->setSetting('handler', 'default')
-      ->setSetting('handler_settings', ['target_bundles' => ['customer']])
-      ->setTranslatable(TRUE);
+      ->setSetting('handler_settings', ['target_bundles' => ['customer']]);
 
     $fields['orders'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Orders'))

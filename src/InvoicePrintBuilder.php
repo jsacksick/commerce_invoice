@@ -133,7 +133,7 @@ class InvoicePrintBuilder implements InvoicePrintBuilderInterface {
    */
   protected function generateFilename(InvoiceInterface $invoice) {
     $file_name = $this->filenameGenerator->generateFilename([$invoice]);
-    $file_name .= '-' . $invoice->getState()->getId() . '.pdf';
+    $file_name .= '-' . $invoice->language()->getId() . '-' . str_replace('_', '', $invoice->getState()->getId()) . '.pdf';
     return $file_name;
   }
 
