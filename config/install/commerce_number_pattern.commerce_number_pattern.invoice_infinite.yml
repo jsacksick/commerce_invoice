@@ -9,7 +9,7 @@ label: Infinite
 targetEntityType: commerce_invoice
 plugin: infinite
 configuration:
-  pattern: '{number}'
+  pattern: '[pattern:number]'
   initial_number: 1
   padding: 0
   per_store_sequence: true

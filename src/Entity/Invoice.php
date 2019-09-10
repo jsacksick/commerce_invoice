@@ -39,7 +39,7 @@ use Drupal\user\UserInterface;
  *     "views_data" = "Drupal\commerce\CommerceEntityViewsData",
  *     "form" = {
  *       "generate" = "Drupal\commerce_invoice\Form\InvoiceGenerateForm",
- *       "delete" = "Drupal\commerce_invoice\Form\InvoiceDeleteForm",
+ *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
  *     },
  *     "local_task_provider" = {
  *       "default" = "Drupal\entity\Menu\DefaultEntityLocalTaskProvider",
@@ -63,6 +63,7 @@ use Drupal\user\UserInterface;
  *     "bundle" = "type",
  *   },
  *   links = {
+ *     "canonical" = "/admin/commerce/invoices/{commerce_invoice}",
  *     "collection" = "/admin/commerce/invoices",
  *     "download" = "/invoice/{commerce_invoice}/download",
  *     "delete-form" = "/admin/commerce/invoices/{commerce_invoice}/delete",
@@ -407,6 +408,9 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
    * {@inheritdoc}
    */
   public function isPaid() {
+    if ($this->getState()->getId() == 'paid') {
+      return TRUE;
+    }
     $total_price = $this->getTotalPrice();
     if (!$total_price) {
       return FALSE;
@@ -629,7 +633,12 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
 
     $fields['uid']
       ->setLabel(t('Customer'))
-      ->setDescription(t('The customer.'));
+      ->setDescription(t('The customer.'))
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'author',
+        'weight' => 0,
+      ]);
 
     $fields['billing_profile'] = BaseFieldDefinition::create('entity_reference_revisions')
       ->setLabel(t('Billing information'))
@@ -652,7 +661,12 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
       ->setRequired(TRUE)
       ->setCardinality(BaseFieldDefinition::CARDINALITY_UNLIMITED)
       ->setSetting('target_type', 'commerce_invoice_item')
-      ->setSetting('handler', 'default');
+      ->setSetting('handler', 'default')
+      ->setDisplayOptions('view', [
+        'label' => 'hidden',
+        'type' => 'commerce_invoice_item_table',
+        'weight' => 0,
+      ]);
 
     $fields['adjustments'] = BaseFieldDefinition::create('commerce_adjustment')
       ->setLabel(t('Adjustments'))
@@ -661,7 +675,13 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
     $fields['total_price'] = BaseFieldDefinition::create('commerce_price')
       ->setLabel(t('Total price'))
       ->setDescription(t('The total price of the invoice.'))
-      ->setReadOnly(TRUE);
+      ->setReadOnly(TRUE)
+      ->setDisplayOptions('view', [
+        'label' => 'hidden',
+        'type' => 'commerce_invoice_total_summary',
+        'weight' => 0,
+      ])
+      ->setDisplayConfigurable('view', TRUE);
 
     $fields['total_paid'] = BaseFieldDefinition::create('commerce_price')
       ->setLabel(t('Total paid'))
@@ -672,6 +692,13 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
       ->setDescription(t('The invoice state.'))
       ->setRequired(TRUE)
       ->setSetting('max_length', 255)
+      ->setDisplayOptions('view', [
+        'label' => 'hidden',
+        'type' => 'state_transition_form',
+        'weight' => 10,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE)
       ->setSetting('workflow_callback', ['\Drupal\commerce_invoice\Entity\Invoice', 'getWorkflowId']);
 
     $fields['data'] = BaseFieldDefinition::create('map')
@@ -688,12 +715,24 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
       ->setDescription(t('The time when the invoice was last edited.'));
 
     $fields['invoice_date'] = BaseFieldDefinition::create('timestamp')
-      ->setLabel(t('Date'))
-      ->setDescription(t('The invoice date'));
+      ->setLabel(t('Invoice date'))
+      ->setDescription(t('The invoice date'))
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'timestamp',
+        'weight' => 0,
+      ])
+      ->setDisplayConfigurable('view', TRUE);
 
     $fields['due_date'] = BaseFieldDefinition::create('timestamp')
       ->setLabel(t('Due date'))
-      ->setDescription(t('The date the invoice is due.'));
+      ->setDescription(t('The date the invoice is due.'))
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'timestamp',
+        'weight' => 0,
+      ])
+      ->setDisplayConfigurable('view', TRUE);
 
     return $fields;
   }

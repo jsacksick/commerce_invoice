@@ -47,17 +47,18 @@ class InvoiceOrderAccessCheck implements AccessInterface {
   public function access(Route $route, RouteMatchInterface $route_match, AccountInterface $account) {
     /** @var \Drupal\commerce_order\Entity\OrderInterface $order */
     $order = $route_match->getParameter('commerce_order');
-
-    if (in_array($order->getState()->getId(), ['canceled', 'draft'])) {
-      return AccessResult::forbidden()->mergeCacheMaxAge(0);
-    }
     $access = AccessResult::allowedIfHasPermission($account, 'administer commerce_invoice')
       ->mergeCacheMaxAge(0);
 
     // Custom requirement for the invoice generate form.
     if ($route->hasRequirement('_invoice_generate_form_access')) {
+      if (in_array($order->getState()->getId(), ['canceled', 'draft'])) {
+        return AccessResult::forbidden()->mergeCacheMaxAge(0);
+      }
+
       $invoice_storage = $this->entityTypeManager->getStorage('commerce_invoice');
       $invoice_ids = $invoice_storage->getQuery()
+        ->condition('state', 'canceled', '!=')
         ->condition('orders', [$order->id()], 'IN')
         ->accessCheck(FALSE)
         ->execute();

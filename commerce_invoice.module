@@ -124,6 +124,16 @@ function commerce_invoice_theme() {
     'commerce_invoice' => [
       'render element' => 'elements',
     ],
+    'commerce_invoice__admin' => [
+      'base hook' => 'commerce_invoice',
+      'render element' => 'elements',
+    ],
+    'commerce_invoice_total_summary' => [
+      'variables' => [
+        'invoice_entity' => NULL,
+        'totals' => NULL,
+      ],
+    ],
   ];
 }
 
@@ -172,7 +182,7 @@ function template_preprocess_commerce_invoice(array &$variables) {
   }
   if ($invoice->getBillingProfile()) {
     $profile_view_bulder = \Drupal::entityTypeManager()->getViewBuilder('profile');
-    $variables['billing_information'] = $profile_view_bulder->view($invoice->getBillingProfile());
+    $variables['invoice']['billing_information'] = $profile_view_bulder->view($invoice->getBillingProfile());
   }
   /** @var \Drupal\commerce_invoice\InvoiceTotalSummaryInterface $invoice_total_summary */
   $invoice_total_summary = \Drupal::service('commerce_invoice.invoice_total_summary');

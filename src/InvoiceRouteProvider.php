@@ -36,6 +36,17 @@ class InvoiceRouteProvider extends AdminHtmlRouteProvider {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  protected function getCanonicalRoute(EntityTypeInterface $entity_type) {
+    $route = parent::getCanonicalRoute($entity_type);
+    // Replace the 'full' view mode with the 'admin' view mode.
+    $route->setDefault('_entity_view', 'commerce_invoice.admin');
+
+    return $route;
+  }
+
+  /**
    * Gets the download route.
    *
    * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
