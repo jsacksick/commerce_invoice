@@ -119,10 +119,10 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
     if (count($orders) === 1 && $first_order->getEmail()) {
       $invoice->setEmail($first_order->getEmail());
 
-      if (!$first_order->get('payment_method')->isEmpty()) {
+      if ($first_order->hasField('payment_method') && !$first_order->get('payment_method')->isEmpty()) {
         $invoice->setPaymentMethod($first_order->get('payment_method')->first()->entity->label());
       }
-      elseif (!$first_order->get('payment_gateway')->isEmpty()) {
+      elseif ($first_order->hasField('payment_gateway') && !$first_order->get('payment_gateway')->isEmpty()) {
         $invoice->setPaymentMethod($first_order->get('payment_gateway')->first()->entity->label());
       }
     }

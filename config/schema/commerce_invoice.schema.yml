@@ -31,3 +31,11 @@ commerce_order.commerce_order_type.*.third_party.commerce_invoice:
     order_placed_generation:
       type: boolean
       label: 'Order placed generation'
+
+language.content_settings.*.*.third_party.commerce_invoice:
+  type: mapping
+  label: 'Invoice settings'
+  mapping:
+    generate_translations:
+      type: boolean
+      label: 'Generate translations for all the available languages'
