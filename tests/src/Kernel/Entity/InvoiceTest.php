@@ -70,6 +70,8 @@ class InvoiceTest extends InvoiceKernelTestBase {
    * @covers ::removeAdjustment
    * @covers ::collectAdjustments
    * @covers ::recalculateTotalPrice
+   * @covers ::getPaymentMethod
+   * @covers ::setPaymentMethod
    * @covers ::getTotalPrice
    * @covers ::getTotalPaid
    * @covers ::setTotalPaid
@@ -217,6 +219,9 @@ class InvoiceTest extends InvoiceKernelTestBase {
     $this->assertEquals($adjustments, $invoice->collectAdjustments(['custom', 'fee']));
     $this->assertEquals([$adjustments[0]], $invoice->collectAdjustments(['custom']));
     $this->assertEquals([$adjustments[1]], $invoice->collectAdjustments(['fee']));
+
+    $invoice->setPaymentMethod('Payment by invoice');
+    $this->assertEquals('Payment by invoice', $invoice->getPaymentMethod());
 
     $this->assertEquals(new Price('0', 'USD'), $invoice->getTotalPaid());
     $this->assertEquals(new Price('17.00', 'USD'), $invoice->getBalance());

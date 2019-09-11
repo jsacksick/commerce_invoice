@@ -342,6 +342,21 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
   /**
    * {@inheritdoc}
    */
+  public function getPaymentMethod() {
+    return $this->get('payment_method')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setPaymentMethod($payment_method) {
+    $this->set('payment_method', $payment_method);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getSubtotalPrice() {
     /** @var \Drupal\commerce_price\Price $subtotal_price */
     $subtotal_price = NULL;
@@ -696,6 +711,13 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
     $fields['adjustments'] = BaseFieldDefinition::create('commerce_adjustment')
       ->setLabel(t('Adjustments'))
       ->setCardinality(BaseFieldDefinition::CARDINALITY_UNLIMITED);
+
+    $fields['payment_method'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Payment method'))
+      ->setDescription(t('The payment method.'))
+      ->setRequired(TRUE)
+      ->setDefaultValue('')
+      ->setSetting('max_length', 255);
 
     $fields['total_price'] = BaseFieldDefinition::create('commerce_price')
       ->setLabel(t('Total price'))

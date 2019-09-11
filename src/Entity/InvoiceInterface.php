@@ -204,6 +204,24 @@ interface InvoiceInterface extends ContentEntityInterface, EntityAdjustableInter
   public function collectAdjustments(array $adjustment_types = []);
 
   /**
+   * Gets the payment method.
+   *
+   * @return string
+   *   The payment method.
+   */
+  public function getPaymentMethod();
+
+  /**
+   * Sets the payment method.
+   *
+   * @param string $payment_method
+   *   The payment method.
+   *
+   * @return $this
+   */
+  public function setPaymentMethod($payment_method);
+
+  /**
    * Gets the invoice subtotal price.
    *
    * Represents a sum of all invoice item totals.

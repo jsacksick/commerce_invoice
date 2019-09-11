@@ -118,6 +118,13 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
     // If we're generating an invoice for a single order, copy its email.
     if (count($orders) === 1 && $first_order->getEmail()) {
       $invoice->setEmail($first_order->getEmail());
+
+      if (!$first_order->get('payment_method')->isEmpty()) {
+        $invoice->setPaymentMethod($first_order->get('payment_method')->first()->entity->label());
+      }
+      elseif (!$first_order->get('payment_gateway')->isEmpty()) {
+        $invoice->setPaymentMethod($first_order->get('payment_gateway')->first()->entity->label());
+      }
     }
 
     $billing_profile = $profile->createDuplicate();
