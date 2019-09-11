@@ -61,9 +61,6 @@ class OrderPaidSubscriber implements EventSubscriberInterface {
       $total_paid = $invoice->getTotalPaid();
       $total_paid = $total_paid ? $total_paid->add($order->getTotalPaid()) : $order->getTotalPaid();
       $invoice->setTotalPaid($total_paid);
-      // @todo: Find a way to remove this workaround.
-      // See InvoiceStorage::doInvoicePresave().
-      $invoice->setData('order_' . $order->id() . '_paid', TRUE);
       $invoice->save();
     }
   }

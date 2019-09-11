@@ -424,9 +424,6 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
    * {@inheritdoc}
    */
   public function isPaid() {
-    if ($this->getState()->getId() == 'paid') {
-      return TRUE;
-    }
     $total_price = $this->getTotalPrice();
     if (!$total_price) {
       return FALSE;

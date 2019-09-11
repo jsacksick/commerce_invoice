@@ -6,8 +6,6 @@ use Drupal\commerce_invoice\Entity\Invoice;
 use Drupal\commerce_order\Adjustment;
 use Drupal\commerce_invoice\Entity\InvoiceItem;
 use Drupal\commerce_order\Entity\Order;
-use Drupal\commerce_order\Entity\OrderItem;
-use Drupal\commerce_order\Entity\OrderItemType;
 use Drupal\commerce_price\Price;
 use Drupal\profile\Entity\Profile;
 use Drupal\Tests\commerce_invoice\Kernel\InvoiceKernelTestBase;
@@ -379,57 +377,6 @@ class InvoiceTest extends InvoiceKernelTestBase {
     ]);
     $another_invoice->save();
     $this->assertEquals(1, $another_invoice->getData('invoice_test_called'));
-  }
-
-  /**
-   * Tests that paying an invoice mark the orders as paid.
-   */
-  public function testPayment() {
-    OrderItemType::create([
-      'id' => 'test',
-      'label' => 'Test',
-      'orderType' => 'default',
-    ])->save();
-    $order_item = OrderItem::create([
-      'type' => 'test',
-      'quantity' => 1,
-      'unit_price' => new Price('12.00', 'USD'),
-    ]);
-    $order_item->save();
-    $order = Order::create([
-      'type' => 'default',
-      'state' => 'completed',
-      'store_id' => $this->store,
-      'uid' => $this->user->id(),
-      'order_items' => [$order_item],
-    ]);
-    $order->save();
-    $this->assertEquals(new Price('12.00', 'USD'), $order->getTotalPrice());
-    $invoice_item = InvoiceItem::create([
-      'type' => 'test',
-    ]);
-    $invoice_item->populateFromOrderItem($order_item);
-    $invoice_item->save();
-    $invoice = Invoice::create([
-      'type' => 'default',
-      'store_id' => $this->store->id(),
-      'invoice_items' => [$invoice_item],
-      'orders' => [$order],
-    ]);
-    $invoice->save();
-    $this->assertEquals(new Price('12.00', 'USD'), $invoice->getTotalPrice());
-    $this->assertEquals(new Price('0', 'USD'), $invoice->getTotalPaid());
-
-    $invoice->setTotalPaid(new Price('10.00', 'USD'));
-    $invoice->save();
-    $this->assertFalse($invoice->isPaid());
-    $this->assertEquals(new Price('0', 'USD'), $order->getTotalPaid());
-
-    $invoice->setTotalPaid(new Price('12.00', 'USD'));
-    $invoice->save();
-    $this->assertTrue($invoice->isPaid());
-    $order = $this->reloadEntity($order);
-    $this->assertEquals(new Price('12.00', 'USD'), $order->getTotalPaid());
   }
 
 }

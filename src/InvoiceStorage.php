@@ -38,14 +38,6 @@ class InvoiceStorage extends CommerceContentEntityStorage {
     // Apply the "paid" transition when an invoice is paid.
     $original_paid = isset($invoice->original) ? $invoice->original->isPaid() : FALSE;
     if ($invoice->isPaid() && !$original_paid) {
-      // When an invoice is paid, we need to mark the orders referenced as paid.
-      foreach ($invoice->getOrders() as $order) {
-        if ($order->isPaid() || $invoice->getData('order_' . $order->id() . '_paid', FALSE)) {
-          continue;
-        }
-        $order->setTotalPaid($order->getTotalPrice());
-        $order->save();
-      }
       $invoice->getState()->applyTransitionById('pay');
     }
   }

@@ -13,6 +13,11 @@ services:
     class: Drupal\commerce_invoice\InvoiceTotalSummary
     arguments: ['@commerce_order.adjustment_transformer']
 
+  commerce_invoice.invoice_subscriber:
+    class: Drupal\commerce_invoice\EventSubscriber\InvoiceSubscriber
+    tags:
+      - { name: event_subscriber }
+
   commerce_invoice.entity_print_subscriber:
     class: Drupal\commerce_invoice\EventSubscriber\EntityPrintSubscriber
     tags:
