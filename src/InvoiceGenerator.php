@@ -97,43 +97,6 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
     /** @var \Drupal\commerce_invoice\Entity\InvoiceInterface $invoice */
     $invoice = $invoice_storage->create($values);
 
-    // If we're generating an invoice for a single order, copy its email.
-    if (count($orders) === 1 && $first_order->getEmail()) {
-      $invoice->setEmail($first_order->getEmail());
-    }
-
-    $billing_profile = $profile->createDuplicate();
-    $billing_profile->save();
-    $invoice->setBillingProfile($billing_profile);
-    // Get the invoice language so we can set it on invoice items.
-    $langcode = $invoice->language()->getId();
-
-    $total_paid = NULL;
-    /** @var \Drupal\commerce_order\Entity\OrderInterface[] $orders */
-    foreach ($orders as $order) {
-      foreach ($order->getAdjustments() as $adjustment) {
-        $invoice->addAdjustment($adjustment);
-      }
-      foreach ($order->getItems() as $order_item) {
-        /** @var \Drupal\commerce_order\Entity\OrderItemTypeInterface $order_item_type */
-        $order_item_type = OrderItemType::load($order_item->bundle());
-        $invoice_item_type = $order_item_type->getPurchasableEntityTypeId() ?: 'default';
-        /** @var \Drupal\commerce_invoice\Entity\InvoiceItemInterface $invoice_item */
-        $invoice_item = $invoice_item_storage->create([
-          'langcode' => $langcode,
-          'type' => $invoice_item_type,
-        ]);
-        $invoice_item->populateFromOrderItem($order_item);
-        $invoice_item->save();
-        $invoice->addItem($invoice_item);
-      }
-      $total_paid = $total_paid ? $total_paid->add($order->getTotalPaid()) : $order->getTotalPaid();
-    }
-    if ($total_paid) {
-      $invoice->setTotalPaid($total_paid);
-    }
-    $invoice->setOrders($orders);
-
     // If the invoice type is configured to do so, generate the translations
     // for all the available languages.
     if ($this->moduleHandler->moduleExists('language')) {
@@ -151,6 +114,54 @@ class InvoiceGenerator implements InvoiceGeneratorInterface {
         }
       }
     }
+
+    // If we're generating an invoice for a single order, copy its email.
+    if (count($orders) === 1 && $first_order->getEmail()) {
+      $invoice->setEmail($first_order->getEmail());
+    }
+
+    $billing_profile = $profile->createDuplicate();
+    $billing_profile->save();
+    $invoice->setBillingProfile($billing_profile);
+    // Get the default invoice language so we can set it on invoice items.
+    $default_langcode = $invoice->language()->getId();
+
+    $total_paid = NULL;
+    /** @var \Drupal\commerce_order\Entity\OrderInterface[] $orders */
+    foreach ($orders as $order) {
+      foreach ($order->getAdjustments() as $adjustment) {
+        $invoice->addAdjustment($adjustment);
+      }
+      foreach ($order->getItems() as $order_item) {
+        /** @var \Drupal\commerce_order\Entity\OrderItemTypeInterface $order_item_type */
+        $order_item_type = OrderItemType::load($order_item->bundle());
+        $invoice_item_type = $order_item_type->getPurchasableEntityTypeId() ?: 'default';
+        /** @var \Drupal\commerce_invoice\Entity\InvoiceItemInterface $invoice_item */
+        $invoice_item = $invoice_item_storage->create([
+          'langcode' => $default_langcode,
+          'type' => $invoice_item_type,
+        ]);
+
+        $invoice_item->populateFromOrderItem($order_item);
+        // If the invoice is translated, we need to generate translations in
+        // all languages for each invoice item.
+        foreach ($invoice->getTranslationLanguages(FALSE) as $langcode => $language) {
+          $translated_invoice_item = $invoice_item->addTranslation($langcode);
+          // We're calling InvoiceItem::populateFromOrderItem() for each
+          // translation since that logic is responsible for pulling the
+          // translated variation title, if available.
+          $translated_invoice_item->populateFromOrderItem($order_item);
+        }
+
+        $invoice_item->save();
+        $invoice->addItem($invoice_item);
+      }
+      $total_paid = $total_paid ? $total_paid->add($order->getTotalPaid()) : $order->getTotalPaid();
+    }
+    if ($total_paid) {
+      $invoice->setTotalPaid($total_paid);
+    }
+    $invoice->setOrders($orders);
 
     $invoice->save();
     return $invoice;

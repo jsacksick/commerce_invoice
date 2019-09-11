@@ -209,7 +209,7 @@ class Invoice extends CommerceContentEntityBase implements InvoiceInterface {
    * {@inheritdoc}
    */
   public function getItems() {
-    return $this->get('invoice_items')->referencedEntities();
+    return $this->getTranslatedReferencedEntities('invoice_items');
   }
 
   /**

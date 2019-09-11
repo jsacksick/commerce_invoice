@@ -107,15 +107,18 @@ class InvoiceListBuilder extends EntityListBuilder {
     $operations = parent::getDefaultOperations($entity);
 
     if ($entity->access('view')) {
+      $options = [
+        'language' => $entity->language(),
+      ];
       $operations['view'] = [
         'title' => t('View'),
-        'url' => $entity->toUrl('canonical'),
+        'url' => $entity->toUrl('canonical', $options),
         'weight' => -50,
       ];
 
       $operations['download'] = [
         'title' => t('Download'),
-        'url' => $entity->toUrl('download', ['language' => $entity->language()]),
+        'url' => $entity->toUrl('download', $options),
       ];
     }
 

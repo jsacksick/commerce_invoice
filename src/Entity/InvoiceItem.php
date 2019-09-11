@@ -52,7 +52,7 @@ class InvoiceItem extends CommerceContentEntityBase implements InvoiceItemInterf
    * {@inheritdoc}
    */
   public function getInvoice() {
-    return $this->get('invoice_id')->entity;
+    return $this->getTranslatedReferencedEntity('invoice_id');
   }
 
   /**
@@ -323,11 +323,15 @@ class InvoiceItem extends CommerceContentEntityBase implements InvoiceItemInterf
     else {
       $title = $order_item->getTitle();
     }
-    $this->set('adjustments', $order_item->getAdjustments());
-    $this->set('quantity', $order_item->getQuantity());
     $this->set('title', $title);
-    $this->set('unit_price', $order_item->getUnitPrice());
-    $this->order_item_id = $order_item->id();
+    // If this is not the default translation, there's no need to reset
+    // the untranslatable fields.
+    if ($this->isDefaultTranslation()) {
+      $this->set('adjustments', $order_item->getAdjustments());
+      $this->set('quantity', $order_item->getQuantity());
+      $this->set('unit_price', $order_item->getUnitPrice());
+      $this->order_item_id = $order_item->id();
+    }
   }
 
   /**
